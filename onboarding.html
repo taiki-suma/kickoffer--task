@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KickOffer 新メンバー向けオンボーディング</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.8;
+    }
+    .hero {
+      background: linear-gradient(135deg, #1a6b3c 0%, #2d9e5f 60%, #4cc88a 100%);
+      color: white;
+      padding: 60px 40px;
+      text-align: center;
+    }
+    .hero .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+    .hero p {
+      font-size: 16px;
+      opacity: 0.85;
+    }
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Section */
+    .section {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .section-icon.green { background: #e8f7ef; }
+    .section-icon.blue  { background: #e8f0fb; }
+    .section-icon.orange{ background: #fff3e8; }
+    .section-icon.red   { background: #fde8e8; }
+    .section-icon.purple{ background: #f0e8fd; }
+    .section-icon.teal  { background: #e8faf7; }
+    .section h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .section h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2d9e5f;
+      margin: 20px 0 8px;
+    }
+
+    /* About KickOffer */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .kpi-card {
+      background: #f8fdf9;
+      border: 1px solid #d4eddb;
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+    }
+    .kpi-card .num {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1a6b3c;
+    }
+    .kpi-card .label {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+    }
+    .vision-block {
+      background: linear-gradient(135deg, #f0faf4, #e8f7ef);
+      border-left: 4px solid #2d9e5f;
+      border-radius: 0 10px 10px 0;
+      padding: 16px 20px;
+      margin-top: 16px;
+    }
+    .vision-block .tag {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2d9e5f;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .vision-block p {
+      font-size: 14px;
+      color: #333;
+    }
+
+    /* Steps */
+    .step-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #2d9e5f;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-content .title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .step-content .desc {
+      font-size: 13px;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    /* Rules */
+    .rule-block {
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+    .rule-block.important {
+      background: #fff8f0;
+      border: 1.5px solid #ffcc85;
+    }
+    .rule-block.normal {
+      background: #f6f9ff;
+      border: 1.5px solid #c5d8ff;
+    }
+    .rule-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .rule-block ul {
+      padding-left: 18px;
+      font-size: 13.5px;
+      color: #444;
+    }
+    .rule-block ul li {
+      margin-bottom: 6px;
+    }
+    .rule-block .note {
+      font-size: 12.5px;
+      color: #888;
+      background: rgba(0,0,0,0.04);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-top: 8px;
+    }
+
+    /* Alert */
+    .alert {
+      background: #fff3cd;
+      border: 1.5px solid #ffc107;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13.5px;
+      color: #555;
+      margin-top: 16px;
+    }
+    .alert strong { color: #d97700; }
+
+    /* Homework */
+    .hw-card {
+      background: linear-gradient(135deg, #1a1a2e, #2d3561);
+      color: white;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 8px;
+    }
+    .hw-card .hw-title {
+      font-size: 13px;
+      opacity: 0.7;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    .hw-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .hw-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .hw-list .q-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #4cc88a;
+      color: #1a1a2e;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Calendar */
+    .cal-box {
+      background: #e8f7ef;
+      border: 1.5px solid #a8e0bd;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .cal-icon { font-size: 28px; }
+    .cal-text .email {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a6b3c;
+      font-family: monospace;
+    }
+    .cal-text .desc {
+      font-size: 12.5px;
+      color: #555;
+      margin-top: 2px;
+    }
+
+    /* Notion link */
+    .notion-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #1a1a2e;
+      color: white;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: 10px;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    /* Tag */
+    .tag-pill {
+      display: inline-block;
+      background: #e8f7ef;
+      color: #1a6b3c;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 20px;
+      padding: 2px 10px;
+      margin-right: 4px;
+    }
+
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero h1 { font-size: 24px; }
+      .section { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">NEW MEMBER ONBOARDING</div>
+  <h1>KickOfferへようこそ！</h1>
+  <p>本資料を確認し、活動を開始してください。</p>
+</div>
+
+<div class="container">
+
+  <!-- 1. KickOfferとは -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon green">⚽</div>
+      <h2>KickOfferとは</h2>
+    </div>
+
+    <p style="font-size:14px; color:#333;">
+      KickOffer（キックオファー）は、<strong>ジュニアユース（中学生年代）のサッカーチーム選びを支援するマッチングプラットフォーム</strong>です。<br>
+      人材業界の求人サイトをサッカー版にしたイメージで、選手・保護者のチーム選びの不安を解消し、指導者・チームの選手獲得課題も解決します。
+    </p>
+
+    <div class="vision-block">
+      <div class="tag">Vision</div>
+      <p>スポーツの世界で選手たちの夢と可能性が広がり、選手が自分らしく輝ける未来をつくる。</p>
+    </div>
+    <div class="vision-block" style="margin-top:8px; background: linear-gradient(135deg,#f0f4ff,#e8eeff); border-left-color:#4a6cf7;">
+      <div class="tag" style="color:#4a6cf7;">Mission</div>
+      <p>選手一人ひとりの「自分で選ぶ力」を信じ、その選択肢と可能性を、どこまでも広げていく。</p>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="num">270名</div>
+        <div class="label">公式LINE登録者</div>
+      </div>
+      <div class="kpi-card">
+        <div class="num">60チーム</div>
+        <div class="label">連携JYチーム</div>
+      </div>
+      <div class="kpi-card">
+        <div class="num">50団体</div>
+        <div class="label">連携ジュニアチーム</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. アカウント設定 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon blue">🔐</div>
+      <h2>アカウントのログイン・登録</h2>
+    </div>
+
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="title">KickOffer の Google アカウントにログイン</div>
+          <div class="desc">代表（朝）からアカウント情報を受け取り、ログインしてください。</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="title">Instagram のアカウントにログイン</div>
+          <div class="desc">KickOffer 公式アカウントにチームアカウントとしてログインします。</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="title">Threads（スレッツ）をインストール・ログイン</div>
+          <div class="desc">Instagram アプリから Threads にアクセスし、KickOffer アカウントでログインしてください。</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="title">note と Instagram の公式アカウントをチェック</div>
+          <div class="desc">KickOffer の公式 note と Instagram をフォローし、投稿内容・発信の雰囲気を把握しておくこと。</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="title">KickOffer アプリにログイン</div>
+          <div class="desc">公式 LINE のメニューバーからアプリにアクセスし、アカウントを作成・ログインすること。実際のユーザー体験を把握するために必ず実施すること。</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 3. 連絡ツール -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon teal">💬</div>
+      <h2>連絡ツールについて</h2>
+    </div>
+
+    <div class="rule-block normal">
+      <div class="rule-title">📱 主な連絡手段はグループ LINE</div>
+      <ul>
+        <li>チーム内の日常連絡・タスク確認はすべて<strong>グループ LINE</strong>を使います。</li>
+        <li>「公式 LINE（ユーザー向け）」とは別物であるため、混同しないこと。</li>
+        <li>グループ LINE への追加は代表（朝）が行います。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 4. 定例・Notion -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon orange">📅</div>
+      <h2>定例ミーティングと情報管理</h2>
+    </div>
+
+    <h3>定例ミーティング</h3>
+    <div class="rule-block normal">
+      <div class="rule-title">🗓 毎週金曜日 12:30〜</div>
+      <ul>
+        <li>全員参加が基本です。進捗共有・タスク確認・方針決定を行います。</li>
+        <li>参加できない場合は<strong>必ず事前にグループ LINE で連絡</strong>してください。</li>
+        <li>今週の定例は参加不要。<strong>来週金曜から参加</strong>してください。</li>
+      </ul>
+    </div>
+
+    <h3>Notion（情報管理ツール）</h3>
+    <p style="font-size:14px; color:#444; margin-bottom:10px;">
+      KickOffer の全情報は Notion に集約されています。議事録・タスク管理・チーム一覧・SNS計画など、必要な情報はすべてここで確認できます。
+    </p>
+    <a class="notion-link" href="https://www.notion.so/286d185d04cb8018acfec2874f4635a0" target="_blank">
+      📝 KickOffer Notion トップページを開く
+    </a>
+  </div>
+
+  <!-- 5. カレンダー -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon purple">📆</div>
+      <h2>代表のカレンダー追加</h2>
+    </div>
+
+    <p style="font-size:14px; color:#444; margin-bottom:14px;">
+      代表（朝大貴）の Google カレンダーを追加してください。<br>
+      1on1・相談・打ち合わせなど、時間を確保したい場合は随時予約を入れてください。
+    </p>
+
+    <div class="cal-box">
+      <div class="cal-icon">🗓</div>
+      <div class="cal-text">
+        <div class="email">takimaru.soccer@gmail.com</div>
+        <div class="desc">Google カレンダーの「他のカレンダーを追加」からこのアドレスを入力して追加してください。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 利用AIツール -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon blue">🤖</div>
+      <h2>利用するAIツール</h2>
+    </div>
+
+    <ul class="step-list">
+      <li class="step-item">
+        <div class="step-num" style="background:#6b6b6b;">M</div>
+        <div class="step-content">
+          <div class="title">Manus</div>
+          <div class="desc">利用可能ですが、クレジット制のため、KickOffer で必要なタスクが発生した際に限定して使用すること。</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num" style="background:#1a73e8;">G</div>
+        <div class="step-content">
+          <div class="title">Gemini（KickOffer アカウント）</div>
+          <div class="desc">KickOffer のアカウントにあるGemini を使用すること。サービス概要等がすべてインプット済みのため、関連タスクはこちらを使うのが最もスムーズです。</div>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-num" style="background:#c97a2f;">C</div>
+        <div class="step-content">
+          <div class="title">Claude（個人アカウント）</div>
+          <div class="desc">個人アカウントで Claude を利用している場合は、KickOffer の情報をインプットした上で作業に活用しても構いません。</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 7. 主なタスク内容 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon orange">📋</div>
+      <h2>主なタスク内容</h2>
+    </div>
+
+    <div class="rule-block normal" style="margin-bottom:12px;">
+      <div class="rule-title">🎬 ① 動画編集</div>
+      <ul>
+        <li>チーム紹介動画の制作</li>
+        <li>SNS 用（リール・TikTok・Instagram）縦動画の編集</li>
+      </ul>
+    </div>
+
+    <div class="rule-block normal" style="margin-bottom:12px;">
+      <div class="rule-title">🤝 ② 営業活動</div>
+      <ul>
+        <li>フォーム営業・テレアポ・商談</li>
+        <li>対面営業（大会に足を運び、コーチに直接声をかける）</li>
+        <li>リファラル営業（友人のチームを紹介してもらい、アポイントを取る）</li>
+      </ul>
+      <div class="note">対象：ジュニアチーム・ジュニアユースチーム・企業・サッカー協会 など</div>
+    </div>
+
+    <div class="rule-block normal" style="margin-bottom:12px;">
+      <div class="rule-title">⚙️ ③ 業務効率化・運用</div>
+      <ul>
+        <li>アプリ運用・Notion 整備</li>
+        <li>既存業務の効率化提案</li>
+      </ul>
+    </div>
+
+    <div class="rule-block normal" style="margin-bottom:12px;">
+      <div class="rule-title">📱 ④ SNS 運用</div>
+      <ul>
+        <li>Threads・Instagram・note の投稿、公式 LINE の発信</li>
+        <li>単に投稿するだけでなく、戦略的に再現性のある「バズり」を狙い、興味を持ってもらうための導線を設計し、PDCA を回しながら検証・運用すること。</li>
+      </ul>
+    </div>
+
+    <div class="rule-block normal">
+      <div class="rule-title">📄 ⑤ 資料作成</div>
+      <ul>
+        <li>企業向け営業資料</li>
+        <li>プレゼン用スライドの作成</li>
+      </ul>
+    </div>
+
+    <div class="alert" style="margin-top:16px; background:#f0f4ff; border-color:#c5d8ff;">
+      <strong style="color:#4a6cf7;">タスクへの取り組み方</strong><br>
+      こちらからタスクを振ることが多いですが、ただ言われたからやるのではなく「自分ごと化」して取り組んでください。自分の将来の目的と照らし合わせ、そのタスクが KickOffer の何につながっているのかを考えること。意味が分からない場合は必ず確認してください。意図を持って振っています。
+    </div>
+  </div>
+
+  <!-- 8. 現在の注力事項・KPI -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon green">🎯</div>
+      <h2>現在の注力事項と KPI（〜10月）</h2>
+    </div>
+
+    <p style="font-size:14px; color:#333; margin-bottom:16px;">
+      現在 KickOffer が最も注力しているのは、<strong>ジュニアチーム・ジュニアユースチームの確保</strong>と、<strong>7月のイベントに向けた協賛集め</strong>です。<br>
+      特にジュニアユースの確保を最優先としています。選手個人の登録数も重要ですが、まずはチーム単位での集客を優先します。
+    </p>
+
+    <div class="kpi-grid" style="grid-template-columns: repeat(2, 1fr);">
+      <div class="kpi-card">
+        <div class="num">1,000名</div>
+        <div class="label">公式 LINE 登録者目標<br><span style="color:#aaa; font-size:10px;">現在：約170名</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="num">100チーム</div>
+        <div class="label">連携 JY チーム目標<br><span style="color:#aaa; font-size:10px;">東京・横浜・千葉 中心</span></div>
+      </div>
+    </div>
+
+    <div class="note" style="background:#f8fdf9; border:1px solid #d4eddb; border-radius:8px; padding:12px 16px; margin-top:14px; font-size:13px; color:#444;">
+      チーム数が増えた段階で、埼玉エリアへの展開も検討予定です。
+    </div>
+  </div>
+
+  <!-- 9. 参画ルール -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon red">📌</div>
+      <h2>Kickofferに入る際のルールと共通認識</h2>
+    </div>
+
+    <p style="font-size:13px; color:#888; margin-bottom:16px;">
+      以下のルールが守れない場合、KickOffer への参画は難しいと考えています。事前に必ず確認してください。
+    </p>
+
+    <div class="rule-block important">
+      <div class="rule-title">① 報告・連絡・相談を徹底する</div>
+      <ul>
+        <li>定例に参加できないときは、<strong>必ず事前に連絡</strong>すること。</li>
+        <li>今週・来週など忙しくて動けないときは、<strong>その都度グループ LINE で共有</strong>すること。</li>
+      </ul>
+      <div class="note">
+        状況を共有することでタスクの調整が可能です。共有がない場合、進捗が停滞する原因となるため、必ず徹底すること。
+      </div>
+    </div>
+
+    <div class="rule-block normal">
+      <div class="rule-title">② 分からないことはすぐに聞く</div>
+      <ul>
+        <li>疑問を抱えたまま進めず、グループ LINE や定例で積極的に確認してください。</li>
+      </ul>
+    </div>
+
+    <div class="rule-block normal">
+      <div class="rule-title">③ タスクの目的を理解する</div>
+      <ul>
+        <li>なぜこのタスクをやっているのか不明な場合は、その都度確認すること。</li>
+        <li>目的を「自分ごと化」して取り組むことが自身の成長につながります。</li>
+        <li>意義が分からないまま「脳死」状態で作業することにならないよう意識してください。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 7. 宿題 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon purple">📚</div>
+      <h2>宿題：来週の定例に向けて</h2>
+    </div>
+
+    <p style="font-size:14px; color:#444; margin-bottom:14px;">
+      来週金曜の定例では、以下の3点について<strong>自分の言葉で説明できるよう</strong>準備してください。<br>
+      Notion の情報等を参照し、各自で調べて概要を把握しておくこと。
+    </p>
+
+    <div class="hw-card">
+      <div class="hw-title">HOMEWORK — 来週の定例までに準備すること</div>
+      <ul class="hw-list">
+        <li>
+          <div class="q-num">Q1</div>
+          <div>KickOffer はどのようなサービスか</div>
+        </li>
+        <li>
+          <div class="q-num">Q2</div>
+          <div>KickOffer はどのような課題を解決するサービスなのか</div>
+        </li>
+        <li>
+          <div class="q-num">Q3</div>
+          <div>そのために、どのような機能やサービスを提供しているのか</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="alert">
+      <strong>今週の定例（今週金曜）は参加不要</strong>です。来週金曜から参加してください。
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  KickOffer — 最終更新: 2026-05-24
+</div>
+
+</body>
+</html>
