@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KOタスク">
+  <title>KickOffer タスク管理</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --primary: #f97316;
+      --primary-dark: #ea580c;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --todo-bg: #f1f5f9;
+      --todo-fg: #64748b;
+      --doing-bg: #eff6ff;
+      --doing-fg: #2563eb;
+      --done-bg: #f0fdf4;
+      --done-fg: #16a34a;
+      --overdue: #ef4444;
+      --soon: #f97316;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    /* ─── Setup screen ─── */
+    #setupScreen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .setup-icon { font-size: 56px; margin-bottom: 20px; }
+
+    .setup-title { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+
+    .setup-sub {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 32px;
+      max-width: 320px;
+    }
+
+    .setup-form { width: 100%; max-width: 340px; }
+
+    .setup-steps {
+      text-align: left;
+      background: white;
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .setup-steps li {
+      font-size: 13.5px;
+      color: var(--text);
+      line-height: 1.6;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .setup-steps li:last-child { border-bottom: none; }
+
+    .setup-steps li a { color: var(--primary); text-decoration: none; font-weight: 700; }
+
+    .setup-step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); color: white;
+      font-size: 12px; font-weight: 800;
+      margin-right: 8px; flex-shrink: 0; vertical-align: middle;
+    }
+
+    .setup-tip {
+      background: #fff7ed; border: 1px solid #fed7aa;
+      border-radius: 10px; padding: 12px 14px;
+      margin-bottom: 16px; text-align: left;
+      font-size: 12.5px; color: #9a3412; line-height: 1.7;
+    }
+    .setup-tip strong { display: block; margin-bottom: 4px; color: #c2410c; }
+
+    /* ─── App shell ─── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .header-logo {
+      font-size: 17px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-logo .ko { color: var(--primary); }
+
+    .header-right { display: flex; gap: 6px; align-items: center; }
+
+    .icon-btn {
+      width: 38px; height: 38px;
+      border: none; background: var(--bg);
+      border-radius: 10px; cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .icon-btn:active { background: var(--border); }
+
+    /* ─── Person tabs ─── */
+    .tabs-bar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-shrink: 0;
+    }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+
+    .tabs {
+      display: flex;
+      padding: 0 12px;
+      gap: 2px;
+      min-width: max-content;
+    }
+
+    .tab {
+      padding: 11px 14px;
+      border: none; background: transparent;
+      cursor: pointer;
+      font-size: 14px; font-weight: 500;
+      color: var(--muted);
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      font-family: inherit;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .badge {
+      display: inline-block;
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 11px; font-weight: 700;
+      padding: 1px 5px; border-radius: 8px;
+      margin-left: 3px;
+    }
+    .tab.active .badge { background: #fff4ed; color: var(--primary); }
+
+    /* ─── Task list ─── */
+    .task-list {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 14px 14px 90px;
+    }
+
+    .section-label {
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted);
+      padding: 14px 2px 8px;
+    }
+    .section-label:first-child { padding-top: 4px; }
+
+    /* ─── Active section header ─── */
+    .active-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 2px 10px;
+    }
+    .active-section-title {
+      font-size: 12px; font-weight: 800; letter-spacing: .04em;
+      color: var(--muted); text-transform: uppercase;
+    }
+    .active-section-count {
+      font-size: 12px; font-weight: 700;
+      background: #f1f5f9; color: var(--muted);
+      padding: 3px 10px; border-radius: 20px;
+    }
+
+    /* ─── Done section box ─── */
+    .done-section {
+      background: #f0fdf4;
+      border: 1.5px solid #bbf7d0;
+      border-radius: 16px;
+      margin-top: 16px;
+      overflow: hidden;
+    }
+    .done-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .done-section-header:active { background: #dcfce7; }
+    .done-section-title {
+      font-size: 13px; font-weight: 800;
+      color: #15803d;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .done-section-count {
+      font-size: 12px; font-weight: 700;
+      background: #bbf7d0; color: #15803d;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .done-toggle-icon { font-size: 11px; color: #15803d; }
+    .done-section-body { padding: 0 10px 10px; }
+    .done-section-body .task-card { opacity: 0.7; }
+    .done-section-body .task-card.is-done { opacity: 1; border-left-color: #16a34a; }
+
+    /* ─── Carryover badge ─── */
+    .carryover-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 800;
+      background: #fff7ed; color: #c2410c;
+      border: 1px solid #fed7aa;
+      padding: 3px 8px; border-radius: 20px;
+    }
+
+    /* ─── Quick-done button ─── */
+    .quick-done-btn {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 2px solid #d1fae5;
+      background: white; color: #16a34a;
+      font-size: 15px; font-weight: 900;
+      cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.12s, border-color 0.12s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .quick-done-btn:active { transform: scale(0.88); background: #dcfce7; }
+
+    /* ─── Tab progress ─── */
+    .tab-progress {
+      font-size: 10px; font-weight: 700;
+      color: var(--muted); margin-left: 2px;
+    }
+    .tab.active .tab-progress { color: rgba(255,255,255,0.75); }
+
+    /* ─── Task card ─── */
+    .task-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px 16px 14px;
+      margin-bottom: 10px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04);
+      border-left: 4px solid transparent;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .task-card:active { transform: scale(0.983); box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+    .task-card.is-overdue { border-left-color: var(--overdue); }
+    .task-card.is-soon    { border-left-color: var(--soon); }
+    .task-card.is-doing   { border-left-color: var(--doing-fg); }
+    .task-card.is-done    { opacity: 0.45; border-left-color: var(--done-fg); box-shadow: none; }
+
+    .card-top {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 11px;
+    }
+
+    .task-name {
+      flex: 1;
+      font-size: 16px; font-weight: 700; line-height: 1.4;
+      letter-spacing: -.01em;
+    }
+    .is-done .task-name { text-decoration: line-through; color: var(--muted); font-weight: 500; }
+
+    .status-pip {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+    }
+
+    .card-meta {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .chip {
+      font-size: 12px; font-weight: 700;
+      padding: 4px 10px; border-radius: 20px;
+      letter-spacing: .01em;
+    }
+    .chip-todo  { background: #f1f5f9; color: #475569; }
+    .chip-doing { background: #dbeafe; color: #1d4ed8; }
+    .chip-done  { background: #dcfce7; color: #15803d; }
+
+    .due-chip {
+      font-size: 12px; font-weight: 700;
+      padding: 4px 10px; border-radius: 20px;
+      background: #f8fafc; color: var(--muted);
+    }
+    .due-chip.overdue { background: #fee2e2; color: #b91c1c; }
+    .due-chip.soon    { background: #ffedd5; color: #c2410c; }
+
+    .assignee-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 13px; }
+
+    .assignee-chip {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 13px; font-weight: 600;
+      padding: 4px 10px 4px 4px;
+      background: #f8fafc; border: 1px solid var(--border);
+      border-radius: 20px; color: var(--text);
+    }
+    .assignee-avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--primary); color: white;
+      font-size: 11px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ─── Action button ─── */
+    .action-btn {
+      width: 100%; padding: 13px 16px;
+      border: none; border-radius: 12px;
+      font-size: 15px; font-weight: 800;
+      cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: filter 0.12s, transform 0.1s;
+      letter-spacing: .01em;
+    }
+    .action-btn:active { transform: scale(0.97); filter: brightness(0.91); }
+
+    .btn-start     { background: #e0f2fe; color: #075985; }
+    .btn-done      { background: #bbf7d0; color: #15803d; }
+    .btn-completed { background: #f0fdf4; color: #16a34a; cursor: default; font-weight: 600; }
+
+    /* ─── Empty state ─── */
+    .empty {
+      text-align: center; padding: 70px 20px;
+      color: var(--muted);
+    }
+    .empty .icon { font-size: 52px; margin-bottom: 14px; }
+    .empty .title { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .empty .sub { font-size: 14px; }
+
+    /* ─── Loading ─── */
+    .loading {
+      display: flex; justify-content: center; align-items: center;
+      padding: 80px 20px;
+    }
+    .spinner {
+      width: 34px; height: 34px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── FAB ─── */
+    .fab {
+      position: fixed; bottom: 24px; right: 20px;
+      width: 58px; height: 58px; border-radius: 29px;
+      background: var(--primary); color: white;
+      border: none; font-size: 26px;
+      box-shadow: 0 4px 14px rgba(249,115,22,.45);
+      cursor: pointer; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .fab:active { transform: scale(0.93); box-shadow: 0 2px 8px rgba(249,115,22,.3); }
+
+    /* ─── Modal ─── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.48);
+      z-index: 100;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding: 0 0 env(safe-area-inset-bottom, 0);
+      opacity: 0; pointer-events: none;
+      transition: opacity .22s;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+
+    .sheet {
+      background: white;
+      border-radius: 22px 22px 0 0;
+      width: 100%; max-width: 540px;
+      padding: 8px 22px 32px;
+      transform: translateY(50px);
+      transition: transform .22s;
+      max-height: 92vh; overflow-y: auto;
+    }
+    .overlay.open .sheet { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: var(--border); margin: 10px auto 20px;
+    }
+
+    .sheet-title { font-size: 18px; font-weight: 800; margin-bottom: 20px; }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 12px; font-weight: 700;
+      color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 13px 14px;
+      border: 1.5px solid var(--border); border-radius: 11px;
+      font-size: 15px; font-family: inherit; color: var(--text);
+      background: white; outline: none;
+      transition: border-color .18s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .sheet-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+    .btn-sheet {
+      flex: 1; padding: 14px;
+      border: none; border-radius: 11px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+    .btn-sheet-primary { background: var(--primary); color: white; }
+    .btn-sheet-primary:active { background: var(--primary-dark); }
+    .btn-sheet-cancel { background: var(--bg); color: var(--text); }
+    .btn-sheet-cancel:active { background: var(--border); }
+
+    /* ─── Toast ─── */
+    .toast {
+      position: fixed; bottom: 90px; left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #1e293b; color: white;
+      padding: 10px 22px; border-radius: 22px;
+      font-size: 14px; font-weight: 600;
+      z-index: 200; opacity: 0; pointer-events: none;
+      white-space: nowrap;
+      transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─── Misc ─── */
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity: .5; }
+
+    /* ─── 割り振りモード（フルスクリーン） ─── */
+    .assign-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      z-index: 150;
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+    }
+    .assign-screen.open { transform: translateX(0); }
+
+    .assign-header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    .assign-header-title {
+      flex: 1; font-size: 17px; font-weight: 800;
+    }
+    .assign-save-btn {
+      background: var(--primary); color: white;
+      border: none; border-radius: 20px;
+      padding: 8px 18px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: background .15s;
+    }
+    .assign-save-btn:disabled { background: var(--border); color: var(--muted); cursor: default; }
+    .assign-save-btn:not(:disabled):active { background: var(--primary-dark); }
+
+    .assign-date-bar {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .assign-date-bar label { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+    .assign-date-bar input {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 6px 10px; font-size: 14px; font-family: inherit;
+      outline: none; background: white;
+    }
+    .assign-date-bar input:focus { border-color: var(--primary); }
+
+    .assign-body {
+      flex: 1; overflow-y: auto; padding: 12px 14px 40px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .assign-member {
+      background: white; border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 10px; overflow: hidden;
+    }
+    .assign-member-header {
+      padding: 12px 14px 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .assign-member-name { font-size: 15px; font-weight: 700; flex: 1; }
+    .assign-task-count {
+      font-size: 12px; font-weight: 700;
+      background: var(--primary); color: white;
+      border-radius: 10px; padding: 1px 7px;
+      display: none;
+    }
+    .assign-task-count.has-tasks { display: inline-block; }
+
+    .assign-tasks { padding: 0 14px 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .assign-chip {
+      display: flex; align-items: center; gap: 4px;
+      background: #fff4ed; border: 1px solid #fed7aa;
+      border-radius: 20px; padding: 4px 10px 4px 12px;
+      font-size: 13px; font-weight: 500; color: #9a3412;
+    }
+    .assign-chip-del {
+      background: none; border: none; cursor: pointer;
+      font-size: 14px; color: #fb923c; padding: 0 2px;
+      line-height: 1;
+    }
+
+    .assign-input-row {
+      display: flex; gap: 8px; padding: 8px 12px 12px;
+    }
+    .assign-input-row input {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 9px 12px; font-size: 14px; font-family: inherit;
+      outline: none; background: white;
+    }
+    .assign-input-row input:focus { border-color: var(--primary); }
+    .assign-add-btn {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 9px 14px;
+      font-size: 13px; font-weight: 700; color: var(--text);
+      cursor: pointer; font-family: inherit; white-space: nowrap;
+    }
+    .assign-add-btn:active { background: var(--border); }
+
+    /* ─── 古いタスクの整理バナー ─── */
+    .stale-banner {
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 12px; padding: 12px 14px;
+      margin-bottom: 10px; margin-top: 4px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .stale-banner-text { flex: 1; font-size: 13px; color: #92400e; }
+    .stale-banner-btn {
+      background: #f59e0b; color: white;
+      border: none; border-radius: 8px;
+      padding: 7px 12px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit; white-space: nowrap;
+    }
+    .hidden-count-row {
+      text-align: center; padding: 8px;
+      font-size: 12px; color: var(--muted); cursor: pointer;
+    }
+
+    /* ─── クイック割り振り ─── */
+    .quick-screen {
+      position: fixed; inset: 0; z-index: 210;
+      background: white;
+      display: flex; flex-direction: column;
+      transform: translateY(100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+    }
+    .quick-screen.open { transform: translateY(0); }
+
+    .quick-header {
+      padding: 14px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .quick-title { flex: 1; font-size: 17px; font-weight: 800; }
+    .quick-submit-btn {
+      background: var(--primary); color: white;
+      border: none; border-radius: 20px;
+      padding: 8px 18px; font-size: 14px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .quick-submit-btn:disabled { background: var(--border); color: var(--muted); cursor: default; }
+
+    /* メンバー選択アバター */
+    .quick-members {
+      display: flex; gap: 8px; padding: 12px 14px 10px;
+      overflow-x: auto; flex-shrink: 0;
+      scrollbar-width: none; border-bottom: 1px solid var(--border);
+    }
+    .quick-members::-webkit-scrollbar { display: none; }
+    .quick-member-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      border: 2px solid var(--border); border-radius: 14px;
+      padding: 8px 12px; background: white; cursor: pointer;
+      font-family: inherit; flex-shrink: 0;
+      transition: border-color .12s, background .12s, transform .1s;
+      min-width: 60px;
+    }
+    .quick-member-btn:active { transform: scale(0.94); }
+    .quick-member-btn.selected {
+      border-color: var(--primary);
+      background: #fff4ed;
+    }
+    .quick-member-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 900; color: white;
+    }
+    .quick-member-name {
+      font-size: 11px; font-weight: 700; color: var(--text);
+      white-space: nowrap;
+    }
+    .quick-member-count {
+      font-size: 10px; color: var(--primary); font-weight: 800;
+      display: none;
+    }
+    .quick-member-btn.has-tasks .quick-member-count { display: block; }
+
+    /* タスク入力エリア */
+    .quick-input-area {
+      padding: 12px 14px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; background: #fafafa;
+    }
+    .quick-selected-label {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+    }
+    .quick-selected-name {
+      color: var(--primary); font-size: 13px;
+    }
+    .quick-input-row { display: flex; gap: 8px; }
+    .quick-input {
+      flex: 1; border: 2px solid var(--primary); border-radius: 10px;
+      padding: 12px 14px; font-size: 15px; font-family: inherit;
+      outline: none; background: white;
+    }
+    .quick-add-btn {
+      background: var(--primary); color: white;
+      border: none; border-radius: 10px;
+      padding: 0 18px; font-size: 20px; font-weight: 900;
+      cursor: pointer; font-family: inherit;
+      transition: background .12s, transform .1s;
+    }
+    .quick-add-btn:active { transform: scale(0.92); background: var(--primary-dark); }
+    .quick-no-member {
+      font-size: 13px; color: var(--muted); text-align: center;
+      padding: 8px 0;
+    }
+
+    /* 期日 */
+    .quick-date-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .quick-date-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+    .quick-date-input {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 6px 10px; font-size: 13px; font-family: inherit;
+      outline: none;
+    }
+    .quick-date-input:focus { border-color: var(--primary); }
+
+    /* キュー */
+    .quick-queue { flex: 1; overflow-y: auto; padding: 8px 14px 40px; }
+    .quick-queue-empty {
+      text-align: center; padding: 40px 20px;
+      font-size: 14px; color: var(--muted); line-height: 1.8;
+    }
+    .quick-queue-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; margin-bottom: 6px;
+      background: var(--bg); border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .quick-queue-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 900; color: white; flex-shrink: 0;
+    }
+    .quick-queue-name { flex: 1; font-size: 14px; font-weight: 600; color: var(--text); }
+    .quick-queue-del {
+      background: none; border: none; color: #cbd5e1;
+      font-size: 16px; cursor: pointer; padding: 2px 4px; line-height: 1;
+    }
+    .quick-queue-del:active { color: var(--overdue); }
+
+    /* ─── マイタスクパッド ─── */
+    .mypad-screen {
+      position: fixed; inset: 0; z-index: 200;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .25s cubic-bezier(.4,0,.2,1);
+    }
+    .mypad-screen.open { transform: translateX(0); }
+
+    .mypad-header {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    .mypad-title { flex: 1; font-size: 17px; font-weight: 800; }
+    .mypad-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--primary); color: white;
+      font-size: 14px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* タブ切り替え */
+    .mypad-tabs {
+      display: flex; background: white;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .mypad-tab {
+      flex: 1; padding: 11px;
+      border: none; background: none;
+      font-size: 14px; font-weight: 700;
+      color: var(--muted); cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-family: inherit;
+      transition: color .15s, border-color .15s;
+    }
+    .mypad-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    .mypad-body { flex: 1; overflow-y: auto; padding: 16px; }
+
+    /* 一括入力 */
+    .mypad-textarea {
+      width: 100%; min-height: 180px;
+      border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 13px 14px; font-size: 15px; font-family: inherit;
+      line-height: 1.8; resize: none; outline: none;
+      background: white;
+      transition: border-color .15s;
+    }
+    .mypad-textarea:focus { border-color: var(--primary); }
+    .mypad-hint { font-size: 12px; color: var(--muted); margin: 8px 0 16px; line-height: 1.6; }
+
+    .mypad-date-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .mypad-date-label { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+    .mypad-date-input {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; font-size: 14px; font-family: inherit;
+      outline: none; background: white;
+    }
+    .mypad-date-input:focus { border-color: var(--primary); }
+
+    .mypad-submit {
+      width: 100%; padding: 15px;
+      background: var(--primary); color: white;
+      border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 800;
+      cursor: pointer; font-family: inherit;
+      transition: background .15s, transform .1s;
+    }
+    .mypad-submit:active { transform: scale(0.97); background: var(--primary-dark); }
+    .mypad-submit:disabled { background: var(--border); color: var(--muted); cursor: default; transform: none; }
+
+    /* テンプレート */
+    .tpl-section { margin-bottom: 20px; }
+    .tpl-section-title {
+      font-size: 12px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .05em;
+      margin-bottom: 10px;
+    }
+    .tpl-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tpl-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: white;
+      font-size: 13px; font-weight: 600; color: var(--text);
+      cursor: pointer; font-family: inherit;
+      transition: background .12s, border-color .12s, transform .1s;
+      user-select: none;
+    }
+    .tpl-chip.selected { background: #fff4ed; border-color: var(--primary); color: var(--primary); }
+    .tpl-chip:active { transform: scale(0.95); }
+    .tpl-del { background: none; border: none; color: #cbd5e1; font-size: 13px; cursor: pointer; padding: 0; line-height: 1; }
+    .tpl-del:hover { color: var(--overdue); }
+
+    .tpl-add-row { display: flex; gap: 8px; margin-top: 12px; }
+    .tpl-add-input {
+      flex: 1; border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 9px 12px; font-size: 14px; font-family: inherit;
+      outline: none; background: white;
+    }
+    .tpl-add-input:focus { border-color: var(--primary); }
+    .tpl-add-btn {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 9px 14px;
+      font-size: 14px; font-weight: 700; color: var(--text);
+      cursor: pointer; font-family: inherit;
+    }
+    .tpl-add-btn:active { background: var(--border); }
+
+    .tpl-selected-preview {
+      background: #fff4ed; border: 1px solid #fed7aa;
+      border-radius: 10px; padding: 10px 14px;
+      margin-top: 14px; font-size: 13px; color: #9a3412;
+      display: none;
+    }
+    .tpl-selected-preview.show { display: block; }
+    .hidden-count-row:hover { color: var(--primary); }
+
+    /* ─── 組織・目標ページ ─── */
+    .org-screen {
+      position: fixed; inset: 0; z-index: 210;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform .28s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto;
+    }
+    .org-screen.open { transform: translateX(0); }
+
+    .org-header {
+      background: white; border-bottom: 1px solid var(--border);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0; position: sticky; top: 0; z-index: 1;
+    }
+    .org-title { flex: 1; font-size: 17px; font-weight: 800; }
+
+    .org-body { padding: 16px 16px 60px; }
+
+    /* ノーススター */
+    .northstar-card {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      border-radius: 18px; padding: 20px 18px; margin-bottom: 20px;
+      color: white;
+    }
+    .northstar-label {
+      font-size: 11px; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; opacity: .75; margin-bottom: 8px;
+    }
+    .northstar-goal {
+      font-size: 18px; font-weight: 900; line-height: 1.5; margin-bottom: 12px;
+    }
+    .northstar-kpis {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .northstar-kpi {
+      background: rgba(255,255,255,.2); border-radius: 20px;
+      padding: 5px 12px; font-size: 12px; font-weight: 700;
+    }
+
+    /* 部門カード */
+    .dept-section-title {
+      font-size: 12px; font-weight: 800; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .05em;
+      padding: 4px 2px 10px;
+    }
+    .dept-card {
+      background: white; border-radius: 14px; padding: 14px 16px;
+      margin-bottom: 10px;
+      box-shadow: 0 1px 6px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+      border-left: 4px solid transparent;
+    }
+    .dept-card-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .dept-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .dept-name { font-size: 15px; font-weight: 800; }
+    .dept-members { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dept-member {
+      display: flex; align-items: center; gap: 5px;
+      padding: 4px 10px 4px 4px; border-radius: 20px;
+      background: var(--bg); border: 1px solid var(--border);
+      font-size: 12px; font-weight: 600;
+    }
+    .dept-member-av {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900; color: white;
+    }
+    .dept-lead-badge {
+      font-size: 9px; font-weight: 800; color: white;
+      background: var(--primary); border-radius: 4px;
+      padding: 1px 4px; margin-left: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SETUP SCREEN ══ -->
+<div id="setupScreen" style="display:none;">
+  <div class="setup-icon">⚽</div>
+  <h1 class="setup-title">KickOffer タスク管理</h1>
+  <p class="setup-sub">Notion APIトークンを入力してください。</p>
+  <div class="setup-form">
+
+    <div class="setup-tip">
+      <strong>⚠️ インテグレーションが見つからない場合</strong>
+      作成時に「ワークスペース」が <strong>KickOffer</strong> になっているか確認してください。<br>
+      個人ワークスペースで作ると選択肢に表示されません。
+    </div>
+
+    <ol class="setup-steps">
+      <li>
+        <span class="setup-step-num">1</span>
+        <a href="https://www.notion.so/profile/integrations" target="_blank">notion.so/profile/integrations</a> を開く
+      </li>
+      <li>
+        <span class="setup-step-num">2</span>
+        「新しいインテグレーションを作成」→<br>
+        <span style="color:var(--muted);font-size:12px;margin-left:30px;">ワークスペース: <strong style="color:#c2410c;">KickOffer</strong> を選択（重要！）</span><br>
+        <span style="color:var(--muted);font-size:12px;margin-left:30px;">名前: KOタスク（なんでもOK）→「保存」</span>
+      </li>
+      <li>
+        <span class="setup-step-num">3</span>
+        「内部インテグレーションシークレット」の<br>
+        <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px;">secret_xxxx...</code> をコピー
+      </li>
+      <li>
+        <span class="setup-step-num">4</span>
+        下の欄にトークンを貼り付けて「設定して始める」
+      </li>
+      <li>
+        <span class="setup-step-num">5</span>
+        アプリが開いたら、Notionで以下の2つのDBを開き<br>
+        「…」→「コネクト先を追加」→ 作ったインテグレーションを選ぶ<br>
+        <a href="https://www.notion.so/286d185d04cb8082b543c772e4bc1de0" target="_blank" style="font-size:12px;">📋 タスク管理DB</a>&nbsp;&nbsp;
+        <a href="https://www.notion.so/286d185d04cb8033a158f4ee811bb8d9" target="_blank" style="font-size:12px;">📝 議事録メモDB</a>
+      </li>
+    </ol>
+
+    <div class="field">
+      <label>APIトークン（secret_xxxx...）</label>
+      <input type="text" id="tokenInput" placeholder="secret_xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="btn-sheet btn-sheet-primary" style="width:100%; padding:15px; font-size:16px; border-radius:12px;" onclick="saveToken()">設定して始める</button>
+    <p style="margin-top:14px; font-size:12px; color:var(--muted); text-align:center;">トークンはこのデバイスにのみ保存されます</p>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="app" style="display:none;">
+  <header class="header">
+    <div class="header-logo">
+      <span>⚽</span><span class="ko">KO</span> タスク
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="openOrg()" title="組織・目標">📊</button>
+      <button style="background:#f0fdf4;color:#15803d;border:1.5px solid #bbf7d0;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="openMyPad()" title="自分のタスクを追加">✏️ 自分</button>
+      <button style="background:var(--primary);color:white;border:none;border-radius:20px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="openQuick()">⚡ 割り振り</button>
+      <button class="icon-btn" id="syncBtn" onclick="loadTasks()" title="更新">🔄</button>
+      <button class="icon-btn" onclick="openSettings()" title="設定">⚙️</button>
+    </div>
+  </header>
+
+  <div class="tabs-bar">
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <div class="task-list" id="taskList">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="openAdd()" style="display:none;" title="タスクを追加">＋</button>
+
+<!-- ══ ADD TASK SHEET ══ -->
+<div class="overlay" id="addOverlay" onclick="overlayClose(event, 'addOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">タスクを追加</div>
+    <div class="field">
+      <label>タスク内容 *</label>
+      <input type="text" id="addName" placeholder="やること">
+    </div>
+    <div class="field">
+      <label>担当者</label>
+      <select id="addAssignee">
+        <option value="">未割り当て</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>期日</label>
+      <input type="date" id="addDue">
+    </div>
+    <div class="field">
+      <label>メモ（任意）</label>
+      <textarea id="addNote" rows="2" placeholder="補足や背景など" style="resize:none;"></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-sheet btn-sheet-cancel" onclick="closeOverlay('addOverlay')">キャンセル</button>
+      <button class="btn-sheet btn-sheet-primary" onclick="submitAdd()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 組織・目標ページ ══ -->
+<div class="org-screen" id="orgScreen">
+  <div class="org-header">
+    <button class="icon-btn" onclick="closeOrg()">✕</button>
+    <div class="org-title">📊 KickOffer 組織・目標</div>
+  </div>
+  <div class="org-body" id="orgBody"></div>
+</div>
+
+<!-- ══ クイック割り振り ══ -->
+<div class="quick-screen" id="quickScreen">
+  <div class="quick-header">
+    <button class="icon-btn" onclick="closeQuick()">✕</button>
+    <div class="quick-title">⚡ クイック割り振り</div>
+    <button class="quick-submit-btn" id="quickSubmitBtn" disabled onclick="submitQuick()">送信（0件）</button>
+  </div>
+
+  <!-- メンバー選択 -->
+  <div class="quick-members" id="quickMembers">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- 入力 -->
+  <div class="quick-input-area">
+    <div class="quick-selected-label">
+      担当者：<span class="quick-selected-name" id="quickSelectedName">← 上から選択</span>
+    </div>
+    <div class="quick-input-row">
+      <input class="quick-input" id="quickInput" placeholder="タスクを入力してEnter..."
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addQuickTask();}"
+        disabled>
+      <button class="quick-add-btn" onclick="addQuickTask()" id="quickAddBtn" disabled>＋</button>
+    </div>
+  </div>
+
+  <!-- 期日 -->
+  <div class="quick-date-row">
+    <span class="quick-date-label">📅 期日</span>
+    <input type="date" class="quick-date-input" id="quickDue">
+  </div>
+
+  <!-- キュー -->
+  <div class="quick-queue" id="quickQueue">
+    <div class="quick-queue-empty">
+      上のメンバーをタップして<br>タスクを入力してください
+    </div>
+  </div>
+</div>
+
+<!-- ══ マイタスクパッド ══ -->
+<div class="mypad-screen" id="mypadScreen">
+  <div class="mypad-header">
+    <button class="icon-btn" onclick="closeMyPad()">✕</button>
+    <div class="mypad-avatar">朝</div>
+    <div class="mypad-title">マイタスクパッド</div>
+  </div>
+  <div class="mypad-tabs">
+    <button class="mypad-tab active" id="mypadTab-bulk" onclick="switchMyPadTab('bulk')">📝 一括入力</button>
+    <button class="mypad-tab" id="mypadTab-tpl" onclick="switchMyPadTab('tpl')">⭐ テンプレート</button>
+  </div>
+  <div class="mypad-body" id="mypadBody">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- ══ CARRYOVER SHEET ══ -->
+<div class="overlay" id="carryoverOverlay" onclick="overlayClose(event,'carryoverOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">⏩ 繰越タスクがあります</div>
+    <div id="carryoverBody" style="margin-bottom:20px;font-size:14px;color:var(--muted);line-height:1.7;"></div>
+    <div class="sheet-actions">
+      <button class="btn-sheet btn-sheet-cancel" onclick="closeOverlay('carryoverOverlay')">そのまま</button>
+      <button class="btn-sheet btn-sheet-primary" onclick="bumpCarryoverDates()">今週金曜に更新</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS SHEET ══ -->
+<div class="overlay" id="settingsOverlay" onclick="overlayClose(event, 'settingsOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">設定</div>
+    <div class="field">
+      <label>APIトークン</label>
+      <input type="text" id="settingsToken" placeholder="secret_xxxxxxxxxxxx" spellcheck="false">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn-sheet btn-sheet-cancel" onclick="closeOverlay('settingsOverlay')">キャンセル</button>
+      <button class="btn-sheet btn-sheet-primary" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 割り振りスクリーン ══ -->
+<div class="assign-screen" id="assignScreen">
+  <div class="assign-header">
+    <button class="icon-btn" onclick="closeAssign()">✕</button>
+    <div class="assign-header-title">📋 今週の割り振り</div>
+    <button class="assign-save-btn" id="assignSaveBtn" disabled onclick="submitBatch()">保存（0件）</button>
+  </div>
+  <div id="assignWeekLabel" style="text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:6px 16px 0;"></div>
+  <div class="assign-date-bar">
+    <label>共通期日</label>
+    <input type="date" id="assignDue">
+  </div>
+  <div class="assign-body" id="assignBody">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Config ──────────────────────────────────────────────
+const DB_ID      = '286d185d04cb8082b543c772e4bc1de0';
+const MINUTES_ID = '286d185d04cb8033a158f4ee811bb8d9';
+// file:// で直接開いた場合はローカルプロキシへ、それ以外は相対パス（Cloudflare / localhost:3336 共通）
+const PROXY      = location.protocol === 'file:' ? 'http://localhost:3336/api/notion' : '/api/notion';
+const API        = '';             // プロキシ経由のため不使用
+const VER        = '2022-06-28';
+
+// ── State ────────────────────────────────────────────────
+let token          = '';
+let allTasks       = [];
+let users          = [];
+let currentTab     = 'all';
+let syncing        = false;
+let taskToMeeting  = new Map(); // taskId → { id, label, status, allTaskIds }
+let assignQueue    = [];        // [{ userId, userName, taskName }]
+let showOldTasks   = false;
+let doneCollapsed  = true;      // 完了ボックスの折りたたみ状態
+let myPadTab       = 'bulk';    // 'bulk' | 'tpl'
+let tplSelected    = new Set(); // 選択中のテンプレートインデックス
+const STALE_DAYS   = 14;        // 完了タスクを自動非表示にする日数
+
+// ── Bootstrap ────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  token = localStorage.getItem('ko_token') || '';
+  if (!token) {
+    show('setupScreen');
+  } else {
+    bootApp();
+  }
+});
+
+function saveToken() {
+  const t = el('tokenInput').value.trim();
+  if (!t) { alert('トークンを入力してください'); return; }
+  token = t;
+  localStorage.setItem('ko_token', token);
+  hide('setupScreen');
+  bootApp();
+}
+
+async function bootApp() {
+  show('app');
+  show('fab');
+  await Promise.all([fetchUsers(), loadTasks()]);
+}
+
+// ── Meeting sync ─────────────────────────────────────────
+async function loadMeetings() {
+  try {
+    const r = await fetch(url(`/databases/${MINUTES_ID}/query`), {
+      method: 'POST', headers: headers(),
+      body: JSON.stringify({
+        page_size: 50,
+        sorts: [{ property: '日付', direction: 'descending' }]
+      })
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+
+    taskToMeeting.clear();
+    (d.results || []).forEach(page => {
+      const taskIds = (page.properties['タスク管理用']?.relation || []).map(r => r.id);
+      if (taskIds.length === 0) return;
+
+      const rawTitle = page.properties['概要']?.title?.map(t => t.plain_text).join('') || '';
+      const dateStr  = page.properties['日付']?.date?.start || '';
+      const status   = page.properties['ステータス 1']?.status?.name || '未着手';
+      const tags     = (page.properties['タグ']?.multi_select || []).map(t => t.name);
+
+      const dateLabel = dateStr ? fmtDate(dateStr) : '';
+      const tagLabel  = tags.includes('定例') ? '定例' : (tags[0] || '');
+      const label     = dateLabel ? `${dateLabel} ${tagLabel}`.trim() : (rawTitle || tagLabel);
+
+      taskIds.forEach(tid => {
+        taskToMeeting.set(tid, { id: page.id, label, status, allTaskIds: taskIds });
+      });
+    });
+  } catch (e) { /* non-fatal: task cards just won't show meeting label */ }
+}
+
+async function syncMeetingStatus(taskId, newTaskStatus) {
+  const meeting = taskToMeeting.get(taskId);
+  if (!meeting) return;
+
+  // Calculate new meeting status based on all its tasks
+  const statuses = meeting.allTaskIds.map(tid => {
+    if (tid === taskId) return newTaskStatus;
+    const t = allTasks.find(x => x.id === tid);
+    return t ? t.status : null;
+  }).filter(Boolean);
+
+  let newStatus;
+  if (statuses.length > 0 && statuses.every(s => s === '完了')) {
+    newStatus = '完了';
+  } else if (statuses.some(s => s === '進行中' || s === '完了')) {
+    newStatus = '進行中';
+  } else {
+    newStatus = '未着手';
+  }
+
+  if (newStatus === meeting.status) return;
+
+  try {
+    await fetch(url(`/pages/${meeting.id}`), {
+      method: 'PATCH', headers: headers(),
+      body: JSON.stringify({ properties: { 'ステータス 1': { status: { name: newStatus } } } })
+    });
+    meeting.status = newStatus;
+    const icon = newStatus === '完了' ? '🎉' : '📋';
+    toast(`${icon} 議事録「${meeting.label}」を ${newStatus} に更新`);
+  } catch { /* silent fail — task update itself succeeded */ }
+}
+
+// ── Week helpers ─────────────────────────────────────────
+function nextFriday(from) {
+  const d = from ? new Date(from) : new Date();
+  const day = d.getDay(); // 0=Sun,5=Fri
+  const diff = day === 5 ? 7 : (5 - day + 7) % 7 || 7;
+  const fri = new Date(d);
+  fri.setDate(d.getDate() + diff);
+  return fri;
+}
+
+function lastFriday(from) {
+  const d = from ? new Date(from) : new Date();
+  const day = d.getDay();
+  const diff = day === 5 ? 0 : (day - 5 + 7) % 7;
+  const fri = new Date(d);
+  fri.setDate(d.getDate() - diff);
+  return fri;
+}
+
+function fmtWeekLabel(start, end) {
+  const wd = ['日','月','火','水','木','金','土'];
+  const s = `${start.getMonth()+1}/${start.getDate()}（${wd[start.getDay()]}）`;
+  const e = `${end.getMonth()+1}/${end.getDate()}（${wd[end.getDay()]}）`;
+  return `📅 ${s} 〜 ${e}`;
+}
+
+// ── API helpers ──────────────────────────────────────────
+const headers = () => ({
+  'Authorization': `Bearer ${token}`,
+  'Notion-Version': VER,
+  'Content-Type': 'application/json'
+});
+
+const url = path => PROXY + path;
+
+async function fetchUsers() {
+  try {
+    const r = await fetch(url('/users'), { headers: headers() });
+    const d = await r.json();
+    users = (d.results || []).filter(u => u.type === 'person');
+    buildAssigneeSelect();
+  } catch (e) { /* non-fatal */ }
+}
+
+async function loadTasks() {
+  if (syncing) return;
+  syncing = true;
+  el('taskList').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  el('syncBtn').textContent = '⏳';
+
+  try {
+    let results = [], cursor = null;
+    do {
+      const body = { page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) };
+      const r = await fetch(url(`/databases/${DB_ID}/query`), {
+        method: 'POST', headers: headers(), body: JSON.stringify(body)
+      });
+      if (!r.ok) {
+        const e = await r.json();
+        throw new Error(e.message || `HTTP ${r.status}`);
+      }
+      const d = await r.json();
+      results = results.concat(d.results || []);
+      cursor = d.has_more ? d.next_cursor : null;
+    } while (cursor);
+
+    allTasks = results.map(parseTask);
+    await loadMeetings();
+    render();
+    // 繰越チェック
+    const today = startOfDay(new Date());
+    const carryovers = allTasks.filter(t => {
+      if (t.status === '完了') return false;
+      if (!t.due) return false;
+      return new Date(t.due + 'T00:00:00') < today;
+    });
+    if (carryovers.length > 0) {
+      const fri = nextFriday();
+      const friStr = `${fri.getMonth()+1}/${fri.getDate()}（金）`;
+      el('carryoverBody').innerHTML =
+        `<b style="color:var(--text);">⏩ ${carryovers.length}件</b>のタスクが期日を過ぎています。<br>` +
+        carryovers.map(t => `・${esc(t.name)}`).join('<br>') +
+        `<br><br>まとめて <b style="color:var(--primary);">今週金曜 ${friStr}</b> に期日を更新しますか？`;
+      openOverlay('carryoverOverlay');
+    } else {
+      const doneCount = allTasks.filter(t => t.status === '完了').length;
+      toast(`🔄 更新完了 ✅${doneCount}件完了`);
+    }
+  } catch (e) {
+    el('taskList').innerHTML = `
+      <div class="empty">
+        <div class="icon">⚠️</div>
+        <div class="title">読み込みに失敗しました</div>
+        <div class="sub">${esc(e.message)}<br><br>
+          APIトークンとデータベース接続を確認してください
+        </div>
+      </div>`;
+  } finally {
+    syncing = false;
+    el('syncBtn').textContent = '🔄';
+  }
+}
+
+function parseTask(page) {
+  const p = page.properties;
+  let rawName     = p['名前']?.title?.map(t => t.plain_text).join('') || '（名称なし）';
+  const assignees = p['担当者']?.people || [];
+  const status    = p['ステータス']?.status?.name || '未着手';
+  const due       = p['期日']?.date?.start || null;
+
+  // 【名前】プレフィックスから担当者を自動認識（Notionアカウントなしメンバー対応）
+  let displayAssignees = assignees;
+  let name = rawName;
+  if (assignees.length === 0) {
+    const m = rawName.match(/^【(.+?)】\s*/);
+    if (m) {
+      displayAssignees = [{ name: m[1], virtual: true }];
+      name = rawName.slice(m[0].length);
+    }
+  }
+
+  return { id: page.id, name, assignees: displayAssignees, status, due };
+}
+
+async function patchStatus(taskId, newStatus) {
+  // Optimistic update
+  const t = allTasks.find(x => x.id === taskId);
+  if (t) t.status = newStatus;
+  render();
+
+  try {
+    const r = await fetch(url(`/pages/${taskId}`), {
+      method: 'PATCH', headers: headers(),
+      body: JSON.stringify({ properties: { 'ステータス': { status: { name: newStatus } } } })
+    });
+    if (!r.ok) throw new Error();
+    toast(newStatus === '完了' ? '✅ 完了！お疲れさまです' : `📝 「${newStatus}」に更新しました`);
+    syncMeetingStatus(taskId, newStatus); // async, non-blocking
+  } catch {
+    toast('❌ 更新に失敗しました');
+    await loadTasks();
+  }
+}
+
+async function submitAdd() {
+  const name = el('addName').value.trim();
+  if (!name) { el('addName').focus(); return; }
+
+  const assigneeId = el('addAssignee').value;
+  const due        = el('addDue').value;
+  const note       = el('addNote').value.trim();
+
+  const props = {
+    '名前':     { title: [{ text: { content: name } }] },
+    'ステータス': { status: { name: '未着手' } }
+  };
+  if (assigneeId) props['担当者'] = { people: [{ object: 'user', id: assigneeId }] };
+  if (due)        props['期日']  = { date: { start: due } };
+
+  closeOverlay('addOverlay');
+  toast('⏳ 追加中...');
+
+  try {
+    const body = { parent: { database_id: DB_ID }, properties: props };
+    if (note) {
+      body.children = [{
+        object: 'block', type: 'paragraph',
+        paragraph: { rich_text: [{ type: 'text', text: { content: note } }] }
+      }];
+    }
+    const r = await fetch(url('/pages'), {
+      method: 'POST', headers: headers(), body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error();
+    toast('✅ タスクを追加しました');
+    await loadTasks();
+  } catch {
+    toast('❌ 追加に失敗しました');
+  }
+}
+
+// ── 組織・目標ページ ─────────────────────────────────────
+const ORG_DATA = {
+  northstar: {
+    goal: 'LINE 1,000名 × 連携100チーム\n→ 月次収益 20〜30万円',
+    kpis: ['公式LINE 1,000名', '連携JYチーム 100チーム', 'イベント 300名動員', 'コンテスト 3回入賞'],
+    current: ['公式LINE 214名', '連携JYチーム 60チーム', '連携Jr団体 50団体']
+  },
+  leader: { name: '朝 大貴', role: '代表・全体管理' },
+  depts: [
+    {
+      name: '営業部',
+      icon: '🤝', color: '#3b82f6',
+      lead: '朝',
+      members: ['南部', 'リク']
+    },
+    {
+      name: 'SNS運用部',
+      icon: '📱', color: '#8b5cf6',
+      lead: 'ぐち',
+      members: ['リク', '朝']
+    },
+    {
+      name: '動画作成部',
+      icon: '🎬', color: '#ec4899',
+      lead: 'ねね',
+      members: ['キリト']
+    },
+    {
+      name: 'デザイン部門',
+      icon: '🎨', color: '#06b6d4',
+      lead: 'しゅうた',
+      members: []
+    },
+    {
+      name: '7月イベント',
+      icon: '⚽', color: '#f97316',
+      lead: 'もか',
+      members: ['朝']
+    }
+  ]
+};
+
+const memberColor3 = name => {
+  const colors = ['#f97316','#3b82f6','#8b5cf6','#ec4899','#10b981','#f59e0b','#06b6d4'];
+  return colors[(name.charCodeAt(0)||0) % colors.length];
+};
+
+function openOrg() {
+  renderOrg();
+  el('orgScreen').classList.add('open');
+}
+function closeOrg() {
+  el('orgScreen').classList.remove('open');
+}
+
+function renderOrg() {
+  const d = ORG_DATA;
+
+  // 現在の進捗バッジ
+  const currentBadges = d.northstar.current.map(c =>
+    `<span class="northstar-kpi" style="background:rgba(255,255,255,.15);">📍 ${esc(c)}</span>`
+  ).join('');
+  const kpiBadges = d.northstar.kpis.map(k =>
+    `<span class="northstar-kpi">🎯 ${esc(k)}</span>`
+  ).join('');
+
+  // 全体管理
+  const leaderHTML = `
+    <div class="dept-card" style="border-left-color:#f97316; margin-bottom:16px;">
+      <div class="dept-card-header">
+        <div class="dept-icon" style="background:#fff4ed;">👑</div>
+        <div>
+          <div class="dept-name">全体管理</div>
+        </div>
+      </div>
+      <div class="dept-members">
+        <div class="dept-member">
+          <div class="dept-member-av" style="background:${memberColor3('朝')}">${'朝'[0]}</div>
+          朝 大貴<span class="dept-lead-badge">リード</span>
+        </div>
+      </div>
+    </div>`;
+
+  // 部門カード
+  const deptCards = d.depts.map(dept => {
+    const allMembers = [
+      { name: dept.lead, isLead: true },
+      ...dept.members.map(m => ({ name: m, isLead: false }))
+    ];
+    const memberChips = allMembers.map(m => `
+      <div class="dept-member">
+        <div class="dept-member-av" style="background:${memberColor3(m.name)}">${m.name[0]}</div>
+        ${esc(m.name)}${m.isLead ? '<span class="dept-lead-badge">リード</span>' : ''}
+      </div>`).join('');
+
+    return `
+      <div class="dept-card" style="border-left-color:${dept.color}">
+        <div class="dept-card-header">
+          <div class="dept-icon" style="background:${dept.color}18;">${dept.icon}</div>
+          <div class="dept-name">${esc(dept.name)}</div>
+        </div>
+        <div class="dept-members">${memberChips}</div>
+      </div>`;
+  }).join('');
+
+  el('orgBody').innerHTML = `
+    <div class="northstar-card">
+      <div class="northstar-label">⭐ ノーススター目標（〜2026年度）</div>
+      <div class="northstar-goal">${esc(d.northstar.goal).replace('\n','<br>')}</div>
+      <div class="northstar-kpis">${kpiBadges}</div>
+    </div>
+
+    <div class="northstar-card" style="background:linear-gradient(135deg,#0f172a,#1e293b); margin-bottom:20px;">
+      <div class="northstar-label" style="opacity:.6;">📍 現在の進捗</div>
+      <div class="northstar-kpis">${currentBadges}</div>
+    </div>
+
+    <div class="dept-section-title">組織体制</div>
+    ${leaderHTML}
+    ${deptCards}
+  `;
+}
+
+// ── クイック割り振り ─────────────────────────────────────
+let quickQueue2   = [];   // [{ userId, userName, taskName, color }]
+let quickSelected = null; // { id, name, color }
+
+const avatarColors2 = ['#f97316','#3b82f6','#8b5cf6','#ec4899','#10b981','#f59e0b','#06b6d4'];
+const memberColor  = name => avatarColors2[(name.charCodeAt(0)||0) % avatarColors2.length];
+
+// Notionアカウントなしメンバー（【名前】方式）
+const VIRTUAL_MEMBERS = ['しゅうた','ぐち','もか','リク','ねね','南部'];
+
+function openQuick() {
+  quickQueue2 = [];
+  quickSelected = null;
+  const fri = nextFriday();
+  el('quickDue').value = fri.toISOString().slice(0,10);
+  renderQuickMembers();
+  renderQuickQueue();
+  el('quickInput').disabled = true;
+  el('quickAddBtn').disabled = true;
+  el('quickSelectedName').textContent = '← 上から選択';
+  el('quickScreen').classList.add('open');
+  // フォーカス防止（スクロールを防ぐ）
+}
+
+function closeQuick() {
+  el('quickScreen').classList.remove('open');
+}
+
+function renderQuickMembers() {
+  // Notionユーザー + バーチャルメンバー
+  const realMembers = users.map(u => ({ id: u.id, name: u.name, virtual: false }));
+  const virtualSet  = new Set(realMembers.map(u => u.name));
+  const virtualMembers = VIRTUAL_MEMBERS
+    .filter(n => !virtualSet.has(n))
+    .map(n => ({ id: null, name: n, virtual: true }));
+  const allMembers = [...realMembers, ...virtualMembers];
+
+  const countMap = {};
+  quickQueue2.forEach(t => { countMap[t.userName] = (countMap[t.userName]||0)+1; });
+
+  el('quickMembers').innerHTML = allMembers.map(m => {
+    const isSelected = quickSelected?.name === m.name;
+    const cnt = countMap[m.name] || 0;
+    return `<button class="quick-member-btn${isSelected?' selected':''}${cnt>0?' has-tasks':''}"
+      onclick="selectQuickMember(${JSON.stringify(m.id)}, ${JSON.stringify(m.name)}, ${m.virtual})">
+      <div class="quick-member-avatar" style="background:${memberColor(m.name)}">${m.name[0]}</div>
+      <div class="quick-member-name">${esc(m.name)}</div>
+      <div class="quick-member-count">${cnt}件</div>
+    </button>`;
+  }).join('');
+}
+
+function selectQuickMember(id, name, virtual) {
+  quickSelected = { id, name, virtual };
+  renderQuickMembers();
+  el('quickSelectedName').textContent = name;
+  el('quickInput').disabled = false;
+  el('quickAddBtn').disabled = false;
+  el('quickInput').focus();
+}
+
+function addQuickTask() {
+  if (!quickSelected) return;
+  const val = el('quickInput').value.trim();
+  if (!val) return;
+  quickQueue2.push({ userId: quickSelected.id, userName: quickSelected.name, taskName: val, virtual: quickSelected.virtual });
+  el('quickInput').value = '';
+  renderQuickQueue();
+  renderQuickMembers();
+  el('quickInput').focus();
+}
+
+function removeQuickTask(idx) {
+  quickQueue2.splice(idx, 1);
+  renderQuickQueue();
+  renderQuickMembers();
+}
+
+function renderQuickQueue() {
+  const btn = el('quickSubmitBtn');
+  const cnt = quickQueue2.length;
+  btn.textContent = cnt > 0 ? `送信（${cnt}件）` : '送信（0件）';
+  btn.disabled = cnt === 0;
+
+  if (cnt === 0) {
+    el('quickQueue').innerHTML = `<div class="quick-queue-empty">上のメンバーをタップして<br>タスクを入力してください</div>`;
+    return;
+  }
+  el('quickQueue').innerHTML = quickQueue2.map((t, i) => `
+    <div class="quick-queue-item">
+      <div class="quick-queue-avatar" style="background:${memberColor(t.userName)}">${t.userName[0]}</div>
+      <div class="quick-queue-name"><b>${esc(t.userName)}</b>：${esc(t.taskName)}</div>
+      <button class="quick-queue-del" onclick="removeQuickTask(${i})">×</button>
+    </div>`).join('');
+}
+
+async function submitQuick() {
+  if (quickQueue2.length === 0) return;
+  const due = el('quickDue').value;
+  closeQuick();
+  toast(`⏳ ${quickQueue2.length}件を登録中...`);
+  let ok = 0, fail = 0;
+  for (const task of quickQueue2) {
+    let taskName = task.taskName;
+    const props = {
+      '名前':      { title: [{ text: { content: task.virtual ? `【${task.userName}】${taskName}` : taskName } }] },
+      'ステータス': { status: { name: '未着手' } }
+    };
+    if (!task.virtual && task.userId) props['担当者'] = { people: [{ object: 'user', id: task.userId }] };
+    if (due) props['期日'] = { date: { start: due } };
+    try {
+      const r = await fetch(url('/pages'), {
+        method: 'POST', headers: headers(),
+        body: JSON.stringify({ parent: { database_id: DB_ID }, properties: props })
+      });
+      if (!r.ok) throw new Error();
+      ok++;
+    } catch { fail++; }
+  }
+  if (fail === 0) toast(`✅ ${ok}件をNotionに登録しました！`);
+  else toast(`⚠️ ${ok}件成功 / ${fail}件失敗`);
+  await loadTasks();
+}
+
+// ── Render ───────────────────────────────────────────────
+function render() {
+  renderTabs();
+  renderList();
+}
+
+// ── 繰越期日まとめ更新 ────────────────────────────────────
+async function bumpCarryoverDates() {
+  closeOverlay('carryoverOverlay');
+  const fri = nextFriday();
+  const friStr = fri.toISOString().slice(0, 10);
+  const today = startOfDay(new Date());
+  const carryovers = allTasks.filter(t => {
+    if (t.status === '完了') return false;
+    if (!t.due) return false;
+    return new Date(t.due + 'T00:00:00') < today;
+  });
+  toast(`⏳ ${carryovers.length}件の期日を更新中...`);
+  let ok = 0;
+  for (const task of carryovers) {
+    try {
+      await fetch(url(`/pages/${task.id}`), {
+        method: 'PATCH', headers: headers(),
+        body: JSON.stringify({ properties: { '期日': { date: { start: friStr } } } })
+      });
+      task.due = friStr;
+      ok++;
+    } catch { /* continue */ }
+  }
+  const label = `${fri.getMonth()+1}/${fri.getDate()}`;
+  toast(`✅ ${ok}件の期日を${label}（金）に更新しました`);
+  render();
+}
+
+// ── マイタスクパッド ──────────────────────────────────────
+const TPL_KEY = 'ko_mytpl';
+
+function loadTemplates() {
+  try { return JSON.parse(localStorage.getItem(TPL_KEY) || '[]'); } catch { return []; }
+}
+function saveTemplates(arr) {
+  localStorage.setItem(TPL_KEY, JSON.stringify(arr));
+}
+
+function openMyPad() {
+  myPadTab = 'bulk';
+  tplSelected = new Set();
+  const fri = nextFriday();
+  renderMyPad();
+  el('mypadScreen').classList.add('open');
+  // デフォルト期日セット
+  setTimeout(() => {
+    const inp = el('mypadDue');
+    if (inp) inp.value = fri.toISOString().slice(0,10);
+    const inp2 = el('mypadTplDue');
+    if (inp2) inp2.value = fri.toISOString().slice(0,10);
+  }, 50);
+}
+
+function closeMyPad() {
+  el('mypadScreen').classList.remove('open');
+}
+
+function switchMyPadTab(tab) {
+  myPadTab = tab;
+  tplSelected = new Set();
+  el('mypadTab-bulk').classList.toggle('active', tab === 'bulk');
+  el('mypadTab-tpl').classList.toggle('active', tab === 'tpl');
+  renderMyPad();
+  const fri = nextFriday();
+  setTimeout(() => {
+    const inp = el('mypadDue') || el('mypadTplDue');
+    if (inp) inp.value = fri.toISOString().slice(0,10);
+  }, 30);
+}
+
+function renderMyPad() {
+  const fri = nextFriday();
+  const friStr = fri.toISOString().slice(0,10);
+  const lf = lastFriday();
+
+  if (myPadTab === 'bulk') {
+    el('mypadBody').innerHTML = `
+      <div class="mypad-date-row">
+        <span class="mypad-date-label">期日</span>
+        <input type="date" class="mypad-date-input" id="mypadDue" value="${friStr}">
+      </div>
+      <textarea class="mypad-textarea" id="mypadText"
+        placeholder="1行につき1タスクで入力&#10;例：&#10;InstagramにLINE誘導の投稿&#10;金曜定例の司会準備&#10;協賛企業リスト更新"></textarea>
+      <div class="mypad-hint">📌 空行は無視されます。担当者は自動で朝大貴にセットされます。</div>
+      <button class="mypad-submit" id="mypadSubmitBtn" onclick="submitMyPadBulk()">まとめてNotionに追加</button>
+    `;
+  } else {
+    const tpls = loadTemplates().length > 0 ? loadTemplates() : [
+      'InstagramにLINE誘導の投稿',
+      '金曜定例の司会',
+      'チームタスク進捗確認',
+      '連携JYチームへの連絡',
+      '協賛資料の更新',
+      '議事録まとめ・共有'
+    ];
+    // 初期テンプレートを保存（まだ未保存の場合）
+    if (loadTemplates().length === 0) saveTemplates(tpls);
+
+    const chips = tpls.map((t, i) => `
+      <button class="tpl-chip${tplSelected.has(i) ? ' selected' : ''}" onclick="toggleTpl(${i})">
+        ${tplSelected.has(i) ? '✓' : '+'} ${esc(t)}
+        <button class="tpl-del" onclick="event.stopPropagation();deleteTpl(${i})" title="削除">✕</button>
+      </button>`).join('');
+
+    const selectedNames = [...tplSelected].map(i => tpls[i]).filter(Boolean);
+    const previewHTML = selectedNames.length > 0
+      ? `<div class="tpl-selected-preview show">選択中 ${selectedNames.length}件：<br>${selectedNames.map(n => `・${esc(n)}`).join('<br>')}</div>`
+      : `<div class="tpl-selected-preview"></div>`;
+
+    el('mypadBody').innerHTML = `
+      <div class="tpl-section">
+        <div class="tpl-section-title">タップで選択</div>
+        <div class="tpl-grid">${chips}</div>
+        ${previewHTML}
+        <div class="tpl-add-row">
+          <input class="tpl-add-input" id="tplNewInput" placeholder="新しいテンプレートを追加..."
+            onkeydown="if(event.key==='Enter')addTpl()">
+          <button class="tpl-add-btn" onclick="addTpl()">保存</button>
+        </div>
+      </div>
+      <div class="mypad-date-row">
+        <span class="mypad-date-label">期日</span>
+        <input type="date" class="mypad-date-input" id="mypadTplDue" value="${friStr}">
+      </div>
+      <button class="mypad-submit${tplSelected.size === 0 ? '' : ''}" id="mypadTplSubmitBtn"
+        ${tplSelected.size === 0 ? 'disabled' : ''} onclick="submitMyPadTpl()">
+        ${tplSelected.size > 0 ? `${tplSelected.size}件をNotionに追加` : '上のタスクをタップして選択'}
+      </button>
+    `;
+  }
+}
+
+function toggleTpl(idx) {
+  if (tplSelected.has(idx)) tplSelected.delete(idx);
+  else tplSelected.add(idx);
+  renderMyPad();
+  const fri = nextFriday();
+  setTimeout(() => {
+    const inp = el('mypadTplDue');
+    if (inp) inp.value = fri.toISOString().slice(0,10);
+  }, 20);
+}
+
+function addTpl() {
+  const inp = el('tplNewInput');
+  const val = inp?.value.trim();
+  if (!val) return;
+  const tpls = loadTemplates();
+  tpls.push(val);
+  saveTemplates(tpls);
+  renderMyPad();
+  const fri = nextFriday();
+  setTimeout(() => {
+    const inp2 = el('mypadTplDue');
+    if (inp2) inp2.value = fri.toISOString().slice(0,10);
+  }, 20);
+}
+
+function deleteTpl(idx) {
+  const tpls = loadTemplates();
+  tpls.splice(idx, 1);
+  saveTemplates(tpls);
+  tplSelected.delete(idx);
+  // インデックスずれを修正
+  const newSet = new Set();
+  tplSelected.forEach(i => { if (i < idx) newSet.add(i); else if (i > idx) newSet.add(i-1); });
+  tplSelected = newSet;
+  renderMyPad();
+  const fri = nextFriday();
+  setTimeout(() => {
+    const inp = el('mypadTplDue');
+    if (inp) inp.value = fri.toISOString().slice(0,10);
+  }, 20);
+}
+
+async function _submitMyTasks(taskNames, due) {
+  if (taskNames.length === 0) { toast('タスクを入力してください'); return; }
+  const myUser = users.find(u => u.name === '朝 大貴') || users[0];
+  closeMyPad();
+  toast(`⏳ ${taskNames.length}件を追加中...`);
+  let ok = 0, fail = 0;
+  for (const name of taskNames) {
+    const props = {
+      '名前':      { title: [{ text: { content: name } }] },
+      'ステータス': { status: { name: '未着手' } }
+    };
+    if (myUser) props['担当者'] = { people: [{ object: 'user', id: myUser.id }] };
+    if (due)    props['期日']  = { date: { start: due } };
+    try {
+      const r = await fetch(url('/pages'), {
+        method: 'POST', headers: headers(),
+        body: JSON.stringify({ parent: { database_id: DB_ID }, properties: props })
+      });
+      if (!r.ok) throw new Error();
+      ok++;
+    } catch { fail++; }
+  }
+  if (fail === 0) toast(`✅ ${ok}件を追加しました！`);
+  else toast(`⚠️ ${ok}件成功 / ${fail}件失敗`);
+  await loadTasks();
+}
+
+async function submitMyPadBulk() {
+  const text = el('mypadText')?.value || '';
+  const due  = el('mypadDue')?.value || '';
+  const names = text.split('\n').map(s => s.trim()).filter(Boolean);
+  await _submitMyTasks(names, due);
+}
+
+async function submitMyPadTpl() {
+  const tpls = loadTemplates();
+  const due  = el('mypadTplDue')?.value || '';
+  const names = [...tplSelected].map(i => tpls[i]).filter(Boolean);
+  await _submitMyTasks(names, due);
+}
+
+function renderTabs() {
+  // count total / done per person
+  const totals = new Map(); // personName -> total
+  const dones  = new Map(); // personName -> done
+  let totalAll = 0, doneAll = 0;
+
+  allTasks.forEach(t => {
+    const isDone = t.status === '完了';
+    totalAll++;
+    if (isDone) doneAll++;
+    const names = t.assignees.length > 0 ? t.assignees.map(a => a.name) : ['未割当'];
+    names.forEach(n => {
+      totals.set(n, (totals.get(n) || 0) + 1);
+      if (isDone) dones.set(n, (dones.get(n) || 0) + 1);
+    });
+  });
+
+  // 「今週」タブのカウント（次の金曜までが期日 or 繰越）
+  const fri = nextFriday();
+  const today2 = startOfDay(new Date());
+  const thisWeekCount = allTasks.filter(t => {
+    if (t.status === '完了') return false;
+    if (!t.due) return false;
+    const d = new Date(t.due + 'T00:00:00');
+    return d <= fri;
+  }).length;
+
+  const tabs = [
+    { key: 'all',       label: '全員',  total: totalAll,       done: doneAll },
+    { key: 'this-week', label: '今週🗓', total: thisWeekCount,  done: 0, noProgress: true }
+  ];
+  totals.forEach((tot, name) => tabs.push({ key: name, label: name, total: tot, done: dones.get(name) || 0 }));
+
+  el('tabs').innerHTML = tabs.map(({ key, label, total, done, noProgress }) => {
+    const active = noProgress ? total : total - done;
+    const progress = (!noProgress && total > 0) ? `<span class="tab-progress">${done}/${total}</span>` : '';
+    return `<button class="tab${currentTab === key ? ' active' : ''}" onclick="setTab('${esc(key)}')">
+      ${esc(label)}${progress}${active > 0 ? `<span class="badge">${active}</span>` : ''}
+    </button>`;
+  }).join('');
+}
+
+function renderList() {
+  const today = startOfDay(new Date());
+  const soon  = new Date(today); soon.setDate(soon.getDate() + 3);
+
+  let tasks = filtered();
+  const staleCount = countStale();
+
+  // 整理バナー（古い完了タスクが1件以上ある週）
+  let bannerHTML = '';
+  if (staleCount > 0 && !showOldTasks) {
+    bannerHTML = `<div class="stale-banner">
+      <div class="stale-banner-text">⏰ ${STALE_DAYS}日以上前の完了タスクが ${staleCount}件 あります</div>
+      <button class="stale-banner-btn" onclick="archiveOldTasks()">整理する</button>
+    </div>`;
+  }
+
+  // Sort: overdue → due soon → by due → no due; completed last
+  const active = tasks.filter(t => t.status !== '完了').sort((a, b) => {
+    const da = a.due ? new Date(a.due + 'T00:00:00') : null;
+    const db = b.due ? new Date(b.due + 'T00:00:00') : null;
+    if (!da && !db) return 0;
+    if (!da) return 1;
+    if (!db) return -1;
+    return da - db;
+  });
+  const done = tasks.filter(t => t.status === '完了');
+
+  if (active.length === 0 && done.length === 0) {
+    el('taskList').innerHTML = bannerHTML + `
+      <div class="empty">
+        <div class="icon">🎉</div>
+        <div class="title">タスクなし</div>
+        <div class="sub">＋ボタンで新しいタスクを追加</div>
+      </div>`;
+    return;
+  }
+
+  let html = bannerHTML;
+
+  // アクティブセクション
+  if (active.length > 0) {
+    html += `<div class="active-section-header">
+      <span class="active-section-title">📋 進行中・未着手</span>
+      <span class="active-section-count">${active.length}件</span>
+    </div>`;
+    html += active.map(t => cardHTML(t, today, soon)).join('');
+  } else {
+    html += `<div class="empty" style="padding:40px 20px;">
+      <div class="icon">✨</div>
+      <div class="title">全タスク完了！</div>
+    </div>`;
+  }
+
+  // 完了ボックス
+  if (done.length > 0) {
+    html += `<div class="done-section">
+      <div class="done-section-header" onclick="toggleDoneSection()">
+        <span class="done-section-title">✅ 完了済み</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="done-section-count">${done.length}件</span>
+          <span class="done-toggle-icon">${doneCollapsed ? '▼' : '▲'}</span>
+        </div>
+      </div>
+      ${!doneCollapsed ? `<div class="done-section-body">${done.map(t => cardHTML(t, today, soon)).join('')}</div>` : ''}
+    </div>`;
+  }
+
+  // 非表示の古いタスクの件数表示
+  if (staleCount > 0) {
+    html += `<div class="hidden-count-row" onclick="toggleOldTasks()">
+      ${showOldTasks
+        ? '▲ 古いタスクを非表示にする'
+        : `▼ 非表示の完了済み ${staleCount}件 を表示する`}
+    </div>`;
+  }
+
+  el('taskList').innerHTML = html;
+}
+
+function filtered() {
+  let tasks = allTasks;
+  if (currentTab === 'this-week') {
+    // 今週（次の金曜まで期日 or 繰越中の未完了）
+    const fri = nextFriday();
+    const today = startOfDay(new Date());
+    tasks = tasks.filter(t => {
+      if (t.status === '完了') return false;
+      if (!t.due) return false;
+      return new Date(t.due + 'T00:00:00') <= fri;
+    });
+    return tasks; // 今週タブはstaleフィルター不要
+  }
+  if (currentTab === '未割当') tasks = tasks.filter(t => t.assignees.length === 0);
+  else if (currentTab !== 'all') tasks = tasks.filter(t => t.assignees.some(a => a.name === currentTab));
+  if (!showOldTasks) tasks = tasks.filter(t => !isStale(t));
+  return tasks;
+}
+
+function toggleDoneSection() {
+  doneCollapsed = !doneCollapsed;
+  renderList();
+}
+
+function cardHTML(task, today, soon) {
+  const isDone  = task.status === '完了';
+  const isDoing = task.status === '進行中';
+  const isCarryover = !isDone && task.due && new Date(task.due + 'T00:00:00') < today;
+
+  // Due date info
+  let dueLabel = '', dueCls = '', cardCls = '';
+  if (task.due) {
+    const d = new Date(task.due + 'T00:00:00');
+    const diff = Math.round((d - today) / 86400000);
+    if (diff < 0) {
+      dueLabel = `⚠️ ${Math.abs(diff)}日超過`;
+      dueCls = 'overdue';
+      if (!isDone) cardCls = 'is-overdue';
+    } else if (diff === 0) {
+      dueLabel = '📌 今日が期日';
+      dueCls = 'soon';
+      if (!isDone) cardCls = 'is-soon';
+    } else if (diff === 1) {
+      dueLabel = '⏰ 明日が期日';
+      dueCls = 'soon';
+      if (!isDone) cardCls = 'is-soon';
+    } else if (diff <= 7) {
+      dueLabel = `📅 あと${diff}日（${fmt(task.due)}）`;
+    } else {
+      dueLabel = `📅 ${fmt(task.due)}`;
+    }
+  }
+
+  if (!cardCls) {
+    if (isDone) cardCls = 'is-done';
+    else if (isDoing) cardCls = 'is-doing';
+  }
+
+  // Status visuals
+  const STATUS = {
+    '未着手': { pip: '#94a3b8', chip: 'chip-todo',  btn: 'btn-start',    next: '進行中', label: '▶ 開始する' },
+    '進行中': { pip: '#2563eb', chip: 'chip-doing',  btn: 'btn-done',     next: '完了',   label: '✓ 完了にする' },
+    '完了':   { pip: '#16a34a', chip: 'chip-done',   btn: 'btn-completed', next: null,    label: '✅ 完了済み' }
+  };
+  const s = STATUS[task.status] || STATUS['未着手'];
+
+  const btn = s.next
+    ? `<button class="action-btn ${s.btn}" onclick="patchStatus('${task.id}','${s.next}')">${s.label}</button>`
+    : `<div class="action-btn ${s.btn}">${s.label}</div>`;
+
+  // ワンタップ完了ボタン（未完了時のみ）
+  const quickDoneBtn = !isDone
+    ? `<button class="quick-done-btn" onclick="event.stopPropagation();patchStatus('${task.id}','完了')" title="完了にする">✓</button>`
+    : '';
+
+  // 繰越バッジ
+  const carryoverBadge = isCarryover
+    ? `<span class="carryover-badge">⏩ 繰越</span>`
+    : '';
+
+  const avatarColors = ['#f97316','#3b82f6','#8b5cf6','#ec4899','#10b981','#f59e0b','#06b6d4'];
+  const avatarColor  = n => avatarColors[(n.charCodeAt(0) || 0) % avatarColors.length];
+
+  const assignees = task.assignees.length > 0
+    ? task.assignees.map(a => `
+        <span class="assignee-chip">
+          <span class="assignee-avatar" style="background:${avatarColor(a.name)}">${esc(a.name[0])}</span>
+          ${esc(a.name)}
+        </span>`).join('')
+    : `<span class="assignee-chip" style="color:var(--muted);padding-left:10px;">未割当</span>`;
+
+  const meeting = taskToMeeting.get(task.id);
+  const meetingHTML = meeting
+    ? `<div style="margin-top:8px; font-size:11px; color:var(--muted);">📝 ${esc(meeting.label)}</div>`
+    : '';
+
+  return `
+    <div class="task-card ${cardCls}">
+      <div class="card-top">
+        <div class="task-name">${esc(task.name)}</div>
+        ${quickDoneBtn}
+      </div>
+      <div class="card-meta">
+        <span class="chip ${s.chip}">${task.status}</span>
+        ${carryoverBadge}
+        ${dueLabel ? `<span class="due-chip ${dueCls}">${dueLabel}</span>` : ''}
+      </div>
+      <div class="assignee-row">${assignees}</div>
+      ${meetingHTML}
+      ${btn}
+    </div>`;
+}
+
+// ── UI controls ──────────────────────────────────────────
+function setTab(key) {
+  currentTab = key;
+  render();
+  const active = document.querySelector('.tab.active');
+  if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function buildAssigneeSelect() {
+  const s = el('addAssignee');
+  s.innerHTML = '<option value="">未割り当て</option>' +
+    users.map(u => `<option value="${u.id}">${esc(u.name)}</option>`).join('');
+}
+
+function openAdd() {
+  el('addName').value = '';
+  el('addNote').value = '';
+  el('addDue').value  = '';
+  // Pre-select person matching current tab
+  if (currentTab !== 'all' && currentTab !== '未割当') {
+    const u = users.find(x => x.name === currentTab);
+    el('addAssignee').value = u ? u.id : '';
+  } else {
+    el('addAssignee').value = '';
+  }
+  openOverlay('addOverlay');
+  setTimeout(() => el('addName').focus(), 150);
+}
+
+function openSettings() {
+  el('settingsToken').value = token;
+  openOverlay('settingsOverlay');
+}
+
+// ── 割り振りモード ─────────────────────────────────────────
+function openAssign() {
+  assignQueue = [];
+  // デフォルト期日: 次の金曜日
+  const fri = nextFriday();
+  el('assignDue').value = fri.toISOString().slice(0, 10);
+
+  // 週ラベル
+  const lf = lastFriday();
+  el('assignWeekLabel').textContent = fmtWeekLabel(lf, fri);
+
+  buildAssignBody();
+  el('assignScreen').classList.add('open');
+}
+
+function closeAssign() {
+  el('assignScreen').classList.remove('open');
+}
+
+function buildAssignBody() {
+  const body = el('assignBody');
+  if (users.length === 0) {
+    body.innerHTML = `<div class="empty" style="padding:40px 20px;">
+      <div class="icon">😅</div>
+      <div class="title">メンバー情報が未取得です</div>
+      <div class="sub">一度トップ画面に戻って🔄更新してから再度お試しください</div>
+    </div>`;
+    return;
+  }
+  body.innerHTML = users.map(u => `
+    <div class="assign-member" id="member-${u.id}">
+      <div class="assign-member-header">
+        <div class="assign-member-name">👤 ${esc(u.name)}</div>
+        <span class="assign-task-count" id="cnt-${u.id}">0</span>
+      </div>
+      <div class="assign-tasks" id="chips-${u.id}"></div>
+      <div class="assign-input-row">
+        <input type="text"
+          id="inp-${u.id}"
+          placeholder="タスクを入力してEnterで追加"
+          onkeydown="handleAssignKey(event,'${u.id}','${esc(u.name)}')"
+        >
+        <button class="assign-add-btn" onclick="addToQueue('${u.id}','${esc(u.name)}')">追加</button>
+      </div>
+    </div>`).join('');
+}
+
+function handleAssignKey(event, userId, userName) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    addToQueue(userId, userName);
+  }
+}
+
+function addToQueue(userId, userName) {
+  const input = el(`inp-${userId}`);
+  const name = input.value.trim();
+  if (!name) return;
+  assignQueue.push({ userId, userName, taskName: name });
+  input.value = '';
+  input.focus();
+  updateAssignUI(userId);
+}
+
+function removeFromQueue(idx) {
+  const { userId } = assignQueue[idx];
+  assignQueue.splice(idx, 1);
+  updateAssignUI(userId);
+}
+
+function updateAssignUI(userId) {
+  // chips for this user
+  const userTasks = assignQueue.map((t, i) => ({ ...t, idx: i })).filter(t => t.userId === userId);
+  const chipsEl = el(`chips-${userId}`);
+  chipsEl.innerHTML = userTasks.map(t => `
+    <div class="assign-chip">
+      ${esc(t.taskName)}
+      <button class="assign-chip-del" onclick="removeFromQueue(${t.idx})">×</button>
+    </div>`).join('');
+
+  // count badge
+  const cntEl = el(`cnt-${userId}`);
+  if (cntEl) {
+    cntEl.textContent = userTasks.length;
+    cntEl.classList.toggle('has-tasks', userTasks.length > 0);
+  }
+
+  // save button
+  const total = assignQueue.length;
+  const btn = el('assignSaveBtn');
+  btn.textContent = total > 0 ? `Notionに保存（${total}件）` : '保存（0件）';
+  btn.disabled = total === 0;
+}
+
+async function submitBatch() {
+  if (assignQueue.length === 0) return;
+  const due = el('assignDue').value;
+  const total = assignQueue.length;
+
+  el('assignSaveBtn').disabled = true;
+  el('assignSaveBtn').textContent = '保存中...';
+
+  let ok = 0, fail = 0;
+  for (const task of assignQueue) {
+    const props = {
+      '名前':     { title: [{ text: { content: task.taskName } }] },
+      'ステータス': { status: { name: '未着手' } },
+      '担当者':   { people: [{ object: 'user', id: task.userId }] }
+    };
+    if (due) props['期日'] = { date: { start: due } };
+
+    try {
+      const r = await fetch(url('/pages'), {
+        method: 'POST', headers: headers(),
+        body: JSON.stringify({ parent: { database_id: DB_ID }, properties: props })
+      });
+      if (!r.ok) throw new Error();
+      ok++;
+    } catch { fail++; }
+  }
+
+  closeAssign();
+  if (fail === 0) {
+    toast(`✅ ${ok}件のタスクをNotionに追加しました`);
+  } else {
+    toast(`⚠️ ${ok}件成功、${fail}件失敗`);
+  }
+  await loadTasks();
+}
+
+// ── 古いタスクの整理 ──────────────────────────────────────
+function staleCutoff() {
+  const d = new Date(); d.setDate(d.getDate() - STALE_DAYS);
+  d.setHours(0,0,0,0); return d;
+}
+
+function isStale(task) {
+  if (task.status !== '完了') return false;
+  if (!task.due) return false;
+  return new Date(task.due + 'T00:00:00') < staleCutoff();
+}
+
+function countStale() {
+  return allTasks.filter(isStale).length;
+}
+
+async function archiveOldTasks() {
+  const stale = allTasks.filter(isStale);
+  if (stale.length === 0) { toast('整理するタスクはありません'); return; }
+
+  if (!confirm(`${stale.length}件の古い完了タスクをNotionからアーカイブしますか？\n(Notionのゴミ箱に移動します)`)) return;
+
+  toast(`⏳ ${stale.length}件を整理中...`);
+  let ok = 0;
+  for (const task of stale) {
+    try {
+      await fetch(url(`/pages/${task.id}`), {
+        method: 'PATCH', headers: headers(),
+        body: JSON.stringify({ archived: true })
+      });
+      ok++;
+    } catch { /* continue */ }
+  }
+  toast(`🗑️ ${ok}件をアーカイブしました`);
+  await loadTasks();
+}
+
+function toggleOldTasks() {
+  showOldTasks = !showOldTasks;
+  renderList();
+}
+
+function saveSettings() {
+  const t = el('settingsToken').value.trim();
+  if (!t) return;
+  token = t;
+  localStorage.setItem('ko_token', token);
+  closeOverlay('settingsOverlay');
+  toast('✅ トークンを更新しました');
+  loadTasks();
+}
+
+function openOverlay(id)  { el(id).classList.add('open'); }
+function closeOverlay(id) { el(id).classList.remove('open'); }
+function overlayClose(e, id) { if (e.target === el(id)) closeOverlay(id); }
+
+let toastTimer;
+function toast(msg) {
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── Utilities ────────────────────────────────────────────
+const el  = id => document.getElementById(id);
+const show = id => el(id).style.display = '';
+const hide = id => el(id).style.display = 'none';
+const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function startOfDay(d) {
+  const x = new Date(d); x.setHours(0,0,0,0); return x;
+}
+
+function fmt(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function fmtDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+</script>
+</body>
+</html>
