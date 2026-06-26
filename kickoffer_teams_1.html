@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>参加チーム 日程別組み合わせ｜KickOffer 交流 Cup 2026</title>
+<title>参加チーム一覧｜KickOffer 交流 Cup 2026</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Bebas+Neue&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -17,7 +17,7 @@
   }
 
   .card {
-    max-width: 800px;
+    max-width: 760px;
     margin: 0 auto;
     background: #fff;
     border-radius: 16px;
@@ -59,73 +59,101 @@
     color: rgba(255,255,255,0.7);
   }
 
-  .table-wrap {
-    padding: 24px 20px 32px;
-    overflow-x: auto;
+  /* 凡例 */
+  .legend {
+    display: flex;
+    gap: 12px;
+    padding: 14px 32px;
+    background: #e8f5ed;
+    border-bottom: 1px solid #d4e8db;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #444;
+  }
+  .dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 
   table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    min-width: 560px;
+    border-collapse: collapse;
   }
 
-  thead th {
-    font-size: 12px;
-    font-weight: 900;
-    padding: 10px 8px;
-    text-align: center;
-    color: #1a6b3a;
-    background: #e8f5ed;
+  thead tr {
+    background: #f4f6f5;
     border-bottom: 2px solid #1a6b3a;
   }
-  thead th:first-child {
-    text-align: left;
-    padding-left: 12px;
-    border-radius: 8px 0 0 0;
-    min-width: 100px;
-  }
-  thead th:last-child { border-radius: 0 8px 0 0; }
-
-  tbody tr { border-bottom: 1px solid #edf2ef; }
-  tbody tr:last-child td { border-bottom: none; }
-
-  .date-cell {
-    padding: 14px 12px;
-    font-size: 13px;
-    font-weight: 900;
+  thead th {
+    font-size: 11px;
+    font-weight: 700;
     color: #1a6b3a;
+    letter-spacing: 0.06em;
+    padding: 11px 14px;
+    text-align: left;
     white-space: nowrap;
-    vertical-align: middle;
-    background: #f4faf6;
-    border-right: 2px solid #d4e8db;
-  }
-  .date-cell .day { font-size: 11px; font-weight: 500; color: #888; margin-top: 2px; }
-
-  .team-cell {
-    padding: 10px 8px;
-    text-align: center;
-    vertical-align: middle;
   }
 
-  .team-tag {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 8px;
+  tbody tr {
+    border-bottom: 1px solid #edf2ef;
+    transition: background 0.12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #f7fbf8; }
+
+  .num {
     font-size: 12px;
     font-weight: 700;
-    line-height: 1.35;
+    color: #c8d4ce;
+    padding: 16px 0 16px 20px;
+    width: 32px;
+  }
+  .team-cell {
+    padding: 14px 10px 14px 6px;
+  }
+  .team-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0d0d0d;
+  }
+  .league-cell, .region-cell, .year-cell {
+    padding: 14px 14px;
+    vertical-align: middle;
+  }
+  .region-cell {
+    font-size: 12px;
+    color: #555;
     white-space: nowrap;
   }
+  .year-cell {
+    font-size: 12px;
+    color: #777;
+    white-space: nowrap;
+    text-align: center;
+  }
 
-  /* 色分け */
-  .c-blue   { background: #dbeafe; color: #1e3a8a; }
-  .c-yellow { background: #fef9c3; color: #854d0e; }
-  .c-red    { background: #fee2e2; color: #991b1b; }
-  .c-pink   { background: #fce7f3; color: #9d174d; }
-  .c-green  { background: #d1fae5; color: #065f46; font-style: italic; }
-  .c-gray   { background: #f1f5f9; color: #334155; }
+  /* バッジ */
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .t2   { background: #dbeafe; color: #1e3a8a; }
+  .t3   { background: #ede9fe; color: #4c1d95; }
+  .t4   { background: #e0e7ff; color: #3730a3; }
+  .none { background: #fde8db; color: #9a3412; }
+  .chiba { background: #fef9c3; color: #854d0e; }
+  .tbd  { background: #f1f5f9; color: #64748b; }
 
   .footer {
     background: #f4f6f5;
@@ -136,11 +164,13 @@
     line-height: 1.8;
   }
 
-  @media (max-width: 500px) {
+  @media (max-width: 520px) {
     body { padding: 12px 8px; }
     .header { padding: 20px 18px 16px; }
-    .table-wrap { padding: 16px 8px 24px; }
-    .team-tag { font-size: 10px; padding: 4px 6px; }
+    .legend { padding: 12px 18px; gap: 8px; }
+    .num { padding-left: 12px; }
+    .team-name { font-size: 13px; }
+    .region-cell, .year-cell { font-size: 11px; }
   }
 </style>
 </head>
@@ -148,58 +178,119 @@
 <div class="card">
   <div class="header">
     <div class="event-label">KickOffer Junior Exchange Cup · 2026</div>
-    <h1>参加チーム 日程別組み合わせ</h1>
-    <div class="header-sub">会場：サンケイスポーツセンター S4フィールド（埼玉県三郷市）</div>
+    <h1>参加チーム一覧</h1>
+    <div class="header-sub">全12チーム｜会場：サンケイスポーツセンター S4フィールド（埼玉県三郷市）</div>
   </div>
 
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>日程</th>
-          <th>A</th>
-          <th>B</th>
-          <th>C</th>
-          <th>D</th>
-          <th>E</th>
-          <th>F</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="date-cell">7/18 <span class="day">土</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">FC VELTRIX U15</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">エリース</span></td>
-          <td class="team-cell"><span class="team-tag c-yellow">湾岸ローカルズ</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">Zeal Tokyo</span></td>
-          <td class="team-cell"><span class="team-tag c-gray">BLANCA SHINAGAWA FC</span></td>
-          <td class="team-cell"><span class="team-tag c-pink">GA</span></td>
-        </tr>
-        <tr>
-          <td class="date-cell">7/20 <span class="day">月祝</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">FC GIUSTI世田谷</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">Zeal Tokyo</span></td>
-          <td class="team-cell"><span class="team-tag c-red">大森FC</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">東京SC</span></td>
-          <td class="team-cell"><span class="team-tag c-gray">BLANCA SHINAGAWA FC</span></td>
-          <td class="team-cell"><span class="team-tag c-pink">湾岸ローカルズ</span></td>
-        </tr>
-        <tr>
-          <td class="date-cell">7/25 <span class="day">土</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">FC VELTRIX U15</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">篠崎SC</span></td>
-          <td class="team-cell"><span class="team-tag c-red">Zeal Tokyo</span></td>
-          <td class="team-cell"><span class="team-tag c-blue">FC.Forte</span></td>
-          <td class="team-cell"><span class="team-tag c-green">DESEL</span></td>
-          <td class="team-cell"><span class="team-tag c-pink">湾岸ローカルズ</span></td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:#3b82f6"></span>T2（都2部）</div>
+    <div class="legend-item"><span class="dot" style="background:#7c3aed"></span>T3（都3部）</div>
+    <div class="legend-item"><span class="dot" style="background:#6366f1"></span>T4（都4部）</div>
+    <div class="legend-item"><span class="dot" style="background:#f97316"></span>Tリーグ非所属</div>
+    <div class="legend-item"><span class="dot" style="background:#eab308"></span>千葉リーグ</div>
   </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:32px"></th>
+        <th>チーム名</th>
+        <th>所属リーグ</th>
+        <th>拠点</th>
+        <th style="text-align:center">設立</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num">1</td>
+        <td class="team-cell"><div class="team-name">FC GIUSTI世田谷</div></td>
+        <td class="league-cell"><span class="badge t2">T2</span></td>
+        <td class="region-cell">世田谷区</td>
+        <td class="year-cell">1998年</td>
+      </tr>
+      <tr>
+        <td class="num">2</td>
+        <td class="team-cell"><div class="team-name">大森FC</div></td>
+        <td class="league-cell"><span class="badge t2">T2</span></td>
+        <td class="region-cell">大田区</td>
+        <td class="year-cell">2018年</td>
+      </tr>
+      <tr>
+        <td class="num">3</td>
+        <td class="team-cell"><div class="team-name">東京SC</div></td>
+        <td class="league-cell"><span class="badge t2">T2</span></td>
+        <td class="region-cell">品川区</td>
+        <td class="year-cell">2007年</td>
+      </tr>
+      <tr>
+        <td class="num">4</td>
+        <td class="team-cell"><div class="team-name">DESEL</div></td>
+        <td class="league-cell"><span class="badge t2">T2</span></td>
+        <td class="region-cell">大田区</td>
+        <td class="year-cell">2021年</td>
+      </tr>
+      <tr>
+        <td class="num">5</td>
+        <td class="team-cell"><div class="team-name">エリース</div></td>
+        <td class="league-cell"><span class="badge t3">T3</span></td>
+        <td class="region-cell">大田区</td>
+        <td class="year-cell">1970年</td>
+      </tr>
+      <tr>
+        <td class="num">6</td>
+        <td class="team-cell"><div class="team-name">Zeal Tokyo</div></td>
+        <td class="league-cell"><span class="badge t3">T3</span></td>
+        <td class="region-cell">港区・品川区</td>
+        <td class="year-cell">－</td>
+      </tr>
+      <tr>
+        <td class="num">7</td>
+        <td class="team-cell"><div class="team-name">湾岸ローカルズ</div></td>
+        <td class="league-cell"><span class="badge t4">T4</span></td>
+        <td class="region-cell">港区</td>
+        <td class="year-cell">2020年</td>
+      </tr>
+      <tr>
+        <td class="num">8</td>
+        <td class="team-cell"><div class="team-name">FC VELTRIX U15</div></td>
+        <td class="league-cell"><span class="badge none">Tリーグ非所属</span></td>
+        <td class="region-cell">－</td>
+        <td class="year-cell">－</td>
+      </tr>
+      <tr>
+        <td class="num">9</td>
+        <td class="team-cell"><div class="team-name">BLANCA SHINAGAWA FC</div></td>
+        <td class="league-cell"><span class="badge none">Tリーグ非所属</span></td>
+        <td class="region-cell">品川区</td>
+        <td class="year-cell">－</td>
+      </tr>
+      <tr>
+        <td class="num">10</td>
+        <td class="team-cell"><div class="team-name">篠崎SC</div></td>
+        <td class="league-cell"><span class="badge none">Tリーグ非所属</span></td>
+        <td class="region-cell">江戸川区</td>
+        <td class="year-cell">－</td>
+      </tr>
+      <tr>
+        <td class="num">11</td>
+        <td class="team-cell"><div class="team-name">GA</div></td>
+        <td class="league-cell"><span class="badge tbd">確認中</span></td>
+        <td class="region-cell">－</td>
+        <td class="year-cell">－</td>
+      </tr>
+      <tr>
+        <td class="num">12</td>
+        <td class="team-cell"><div class="team-name">FC.Forte</div></td>
+        <td class="league-cell"><span class="badge chiba">千葉リーグ</span></td>
+        <td class="region-cell">千葉県市川市</td>
+        <td class="year-cell">－</td>
+      </tr>
+    </tbody>
+  </table>
 
   <div class="footer">
-    ※ 日程・組み合わせは変更になる場合があります。<br>
-    ※ 各グループ（A〜F）の詳細な試合形式は別途ご案内します。
+    ※ 所属リーグは高円宮杯 JFA U-15 サッカーリーグ 東京都（Tリーグ）2026年度の情報をもとに記載。<br>
+    ※「－」は現時点で未確認の情報です。
   </div>
 </div>
 </body>
