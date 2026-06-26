@@ -17,7 +17,7 @@
   }
 
   .card {
-    max-width: 760px;
+    max-width: 820px;
     margin: 0 auto;
     background: #fff;
     border-radius: 16px;
@@ -59,7 +59,6 @@
     color: rgba(255,255,255,0.7);
   }
 
-  /* 凡例 */
   .legend {
     display: flex;
     gap: 12px;
@@ -76,16 +75,9 @@
     font-weight: 700;
     color: #444;
   }
-  .dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+  table { width: 100%; border-collapse: collapse; }
 
   thead tr {
     background: #f4f6f5;
@@ -115,31 +107,16 @@
     padding: 16px 0 16px 20px;
     width: 32px;
   }
-  .team-cell {
-    padding: 14px 10px 14px 6px;
-  }
-  .team-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: #0d0d0d;
-  }
+  .team-cell { padding: 14px 10px 14px 6px; }
+  .team-name { font-size: 14px; font-weight: 700; color: #0d0d0d; }
+
   .league-cell, .region-cell, .year-cell {
     padding: 14px 14px;
     vertical-align: middle;
   }
-  .region-cell {
-    font-size: 12px;
-    color: #555;
-    white-space: nowrap;
-  }
-  .year-cell {
-    font-size: 12px;
-    color: #777;
-    white-space: nowrap;
-    text-align: center;
-  }
+  .region-cell { font-size: 12px; color: #444; white-space: nowrap; }
+  .year-cell   { font-size: 12px; color: #666; white-space: nowrap; text-align: center; }
 
-  /* バッジ */
   .badge {
     display: inline-block;
     padding: 4px 12px;
@@ -148,12 +125,12 @@
     font-weight: 700;
     white-space: nowrap;
   }
-  .t2   { background: #dbeafe; color: #1e3a8a; }
-  .t3   { background: #ede9fe; color: #4c1d95; }
-  .t4   { background: #e0e7ff; color: #3730a3; }
-  .none { background: #fde8db; color: #9a3412; }
+  .t2    { background: #dbeafe; color: #1e3a8a; }
+  .t3    { background: #ede9fe; color: #4c1d95; }
+  .t4    { background: #e0e7ff; color: #3730a3; }
+  .none  { background: #fde8db; color: #9a3412; }
   .chiba { background: #fef9c3; color: #854d0e; }
-  .tbd  { background: #f1f5f9; color: #64748b; }
+  .tbd   { background: #f1f5f9; color: #64748b; }
 
   .footer {
     background: #f4f6f5;
@@ -164,13 +141,14 @@
     line-height: 1.8;
   }
 
-  @media (max-width: 520px) {
+  @media (max-width: 560px) {
     body { padding: 12px 8px; }
     .header { padding: 20px 18px 16px; }
     .legend { padding: 12px 18px; gap: 8px; }
     .num { padding-left: 12px; }
     .team-name { font-size: 13px; }
-    .region-cell, .year-cell { font-size: 11px; }
+    .region-cell, .year-cell { font-size: 11px; padding: 12px 8px; }
+    thead th { padding: 10px 8px; }
   }
 </style>
 </head>
@@ -201,6 +179,8 @@
       </tr>
     </thead>
     <tbody>
+
+      <!-- T2 -->
       <tr>
         <td class="num">1</td>
         <td class="team-cell"><div class="team-name">FC GIUSTI世田谷</div></td>
@@ -213,7 +193,7 @@
         <td class="team-cell"><div class="team-name">大森FC</div></td>
         <td class="league-cell"><span class="badge t2">T2</span></td>
         <td class="region-cell">大田区</td>
-        <td class="year-cell">2018年</td>
+        <td class="year-cell">2011年</td>
       </tr>
       <tr>
         <td class="num">3</td>
@@ -229,6 +209,8 @@
         <td class="region-cell">大田区</td>
         <td class="year-cell">2021年</td>
       </tr>
+
+      <!-- T3 -->
       <tr>
         <td class="num">5</td>
         <td class="team-cell"><div class="team-name">エリース</div></td>
@@ -240,9 +222,11 @@
         <td class="num">6</td>
         <td class="team-cell"><div class="team-name">Zeal Tokyo</div></td>
         <td class="league-cell"><span class="badge t3">T3</span></td>
-        <td class="region-cell">港区・品川区</td>
+        <td class="region-cell">港区・品川区・目黒区</td>
         <td class="year-cell">－</td>
       </tr>
+
+      <!-- T4 -->
       <tr>
         <td class="num">7</td>
         <td class="team-cell"><div class="team-name">湾岸ローカルズ</div></td>
@@ -250,34 +234,40 @@
         <td class="region-cell">港区</td>
         <td class="year-cell">2020年</td>
       </tr>
+
+      <!-- Tリーグ非所属 -->
       <tr>
         <td class="num">8</td>
-        <td class="team-cell"><div class="team-name">FC VELTRIX U15</div></td>
-        <td class="league-cell"><span class="badge none">Tリーグ非所属</span></td>
-        <td class="region-cell">－</td>
-        <td class="year-cell">－</td>
-      </tr>
-      <tr>
-        <td class="num">9</td>
         <td class="team-cell"><div class="team-name">BLANCA SHINAGAWA FC</div></td>
         <td class="league-cell"><span class="badge none">Tリーグ非所属</span></td>
         <td class="region-cell">品川区</td>
         <td class="year-cell">－</td>
       </tr>
       <tr>
-        <td class="num">10</td>
+        <td class="num">9</td>
         <td class="team-cell"><div class="team-name">篠崎SC</div></td>
         <td class="league-cell"><span class="badge none">Tリーグ非所属</span></td>
         <td class="region-cell">江戸川区</td>
         <td class="year-cell">－</td>
       </tr>
       <tr>
-        <td class="num">11</td>
-        <td class="team-cell"><div class="team-name">GA</div></td>
-        <td class="league-cell"><span class="badge tbd">確認中</span></td>
+        <td class="num">10</td>
+        <td class="team-cell"><div class="team-name">FC VELTRIX U15</div></td>
+        <td class="league-cell"><span class="badge none">Tリーグ非所属</span></td>
         <td class="region-cell">－</td>
         <td class="year-cell">－</td>
       </tr>
+
+      <!-- GAFC -->
+      <tr>
+        <td class="num">11</td>
+        <td class="team-cell"><div class="team-name">GAFC</div></td>
+        <td class="league-cell"><span class="badge tbd">確認中</span></td>
+        <td class="region-cell">調布市</td>
+        <td class="year-cell">2013年</td>
+      </tr>
+
+      <!-- 千葉 -->
       <tr>
         <td class="num">12</td>
         <td class="team-cell"><div class="team-name">FC.Forte</div></td>
@@ -285,12 +275,14 @@
         <td class="region-cell">千葉県市川市</td>
         <td class="year-cell">－</td>
       </tr>
+
     </tbody>
   </table>
 
   <div class="footer">
-    ※ 所属リーグは高円宮杯 JFA U-15 サッカーリーグ 東京都（Tリーグ）2026年度の情報をもとに記載。<br>
-    ※「－」は現時点で未確認の情報です。
+    ※ 所属リーグは高円宮杯 JFA U-15 サッカーリーグ 東京都（Tリーグ）2026年度の公式情報をもとに記載。<br>
+    ※「－」は公式HP・公開情報では確認できなかった項目です。GAFC のリーグは都クラブユース連盟に加盟（2020年〜）、詳細確認中。<br>
+    ※ FC VELTRIX U15 は公開情報なし。エリースの設立年はクラブ全体の創設年（1970年）。
   </div>
 </div>
 </body>
